@@ -28,7 +28,7 @@ node tools/playtest.js --mode win --out docs/proof/phase-1/playtest && node tool
 | Contract: tất định | AC16 | 2 lần chạy so byte (unit), sha256 cả đêm 3 seed | `headless/README.md` bảng Determinism | Đạt |
 | Contract: mã thoát 2 khi file sai | AC17 | Unit CLI 4 trường hợp | `headless/test-report.txt` | Đạt |
 | Contract: toạ độ 3 chữ số, `end` là dòng cuối | — | Unit `output lines` | `headless/test-report.txt` | Đạt |
-| Sáng tạo thêm không phá contract / headless | — | `tools/creative-check.sh phase-1`: không import `web/`, output byte-identical 12 fixture + 4 đêm | [creative-check.txt](creative-check.txt) | Đạt |
+| Sáng tạo thêm không phá contract / headless | — | `tools/creative-check.sh` (so với tag `ui-classic`): không import `web/`, output byte-identical 12 fixture + 4 đêm | [creative-check.txt](creative-check.txt) | Đạt |
 | Phong cách: ấm, vàng cam tốt, tím đen nguy hiểm, Mây đội nón lá treo đèn | — | Xem ảnh (đánh giá chủ quan) | `playtest/*.png` | Đạt (mức đơn giản) |
 
 ## Test có thật sự bắt lỗi không?

@@ -28,6 +28,10 @@ Công cụ: **Claude Code** (desktop app, model Claude Opus 5.5). Harness: [AGEN
 - Ràng buộc tự đặt: chỉ sửa `web/`, không đụng `src/sim.js` → test/headless không đổi; giữ màu theo PRD (vàng cam = tốt, tím đen = nguy hiểm, không bạo lực); không dùng asset ngoài (mọi texture vẽ bằng Canvas, âm thanh tổng hợp).
 - AI sai: dòng đổi màu bụi linh khí truyền `Vector3` vào `Color.lerp` (sẽ ra NaN) — phát hiện khi đọc lại diff trước khi chạy, đã sửa. Kiểm chứng: playtest Chrome headless thắng + thua, 0 lỗi console, ảnh trong `docs/proof/phase-1/playtest/`.
 
+### Viết lại lịch sử git (20/11/2026, trong giờ Phase 1)
+- Theo yêu cầu của chủ dự án, xoá dòng `Co-Authored-By: Claude` khỏi 8 commit Phase 1 (`git filter-branch --msg-filter`), **nội dung code không đổi** (cùng git tree), rồi gắn lại tag `phase-1` và force-push trước hạn Phase 1. Việc dùng AI vẫn được ghi đầy đủ trong file này và `CREDITS.md`.
+- Lưu ý RULES.md §7 ("không viết lại lịch sử sau khi gắn tag"): việc này làm trước hạn phase, có backup nhánh `backup/before-rewrite` trên máy; mã commit cũ → mới: `0066d6f`→`45de48c` (tag `ui-classic`), `ed5d7fb`→`d2174db`.
+
 ### Token / chi phí (ước tính)
 - Không có số đo chính xác trong phiên; ước tính theo độ dài phiên: khoảng **60–80k token output** và **~2–3M token input** (phần lớn là ngữ cảnh được cache đọc lại mỗi lượt). Cập nhật số thật từ trang usage của Claude nếu cần.
 - Cách tiết kiệm: đọc tài liệu lab một lần và tóm tắt vào notes; một module luật dùng chung (không viết luật hai lần); không thêm dependency (không `npm install`, không đọc tài liệu thư viện); dùng script sinh bằng chứng thay vì chụp/đọc ảnh nhiều lần; chỉ đọc 4 ảnh để kiểm tra trực quan.

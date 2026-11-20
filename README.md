@@ -76,8 +76,8 @@ CI: [.github/workflows/ci.yml](.github/workflows/ci.yml) chạy test + mutation 
 Mọi phần sau chỉ nằm ở client (`web/`), **không** đụng luật chơi `src/sim.js`, nên đầu ra headless theo contract không đổi. Không có thực thể nào được thêm vào sim, nên không cần tắt gì khi chạy headless.
 
 **Bằng chứng phần cũ vẫn đúng** — [docs/proof/phase-1/creative-check.txt](docs/proof/phase-1/creative-check.txt), sinh bởi `tools/creative-check.sh`:
-- `src/` và `headless/` không import gì từ `web/`; kể từ tag `phase-1`, không file nào trong `src/`, `headless/`, `game.contract.json` thay đổi.
-- Đầu ra headless **giống hệt từng byte** giữa tag `phase-1` (giao diện cũ) và bản hiện tại (giao diện tiên hiệp): 12/12 kịch bản trong `tests/scenarios` và 4 đêm đầy đủ 18000 tick (seed 1, 7, 42, 2026).
+- `src/` và `headless/` không import gì từ `web/`; kể từ commit giao diện cũ (tag `ui-classic`), không file nào trong `src/`, `headless/`, `game.contract.json` thay đổi.
+- Đầu ra headless **giống hệt từng byte** giữa tag `ui-classic` (giao diện cũ) và bản hiện tại (giao diện tiên hiệp): 12/12 kịch bản trong `tests/scenarios` và 4 đêm đầy đủ 18000 tick (seed 1, 7, 42, 2026).
 - `npm test` 33/33 đạt; playtest client thật thắng + thua, 0 lỗi console.
 
 

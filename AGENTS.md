@@ -8,7 +8,7 @@ Game 3D web (Three.js) + headless Node theo **Test Contract v1.0**. Yêu cầu g
 - Chạy game: `node tools/serve.js` → http://localhost:8080/web/
 - Bằng chứng headless: `node tools/proof.js phase-N` · Playtest client thật: `node tools/playtest.js --mode win|lose --out docs/proof/phase-N/playtest`
 - Kiểm tra test không "luôn xanh": `tools/mutation-check.sh`
-- Sáng tạo không đổi output headless: `tools/creative-check.sh phase-1`
+- Sáng tạo không đổi output headless: `tools/creative-check.sh` (so với tag `ui-classic`)
 
 ## Kiến trúc
 - `src/sim.js`: **toàn bộ luật chơi**, thuần, tất định (mulberry32(seed)). Không `Math.random`/`Date`/DOM ở đây.

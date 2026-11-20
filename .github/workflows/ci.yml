@@ -14,10 +14,10 @@ jobs:
         with: { node-version: '${{ matrix.node }}' }
       - run: npm test
       - run: ./tools/mutation-check.sh
-      - name: Creative additions do not change headless output (vs tag phase-1, if present)
+      - name: Creative additions do not change headless output (vs tag ui-classic, if present)
         run: |
-          git fetch --tags --depth=1 origin 'refs/tags/phase-1:refs/tags/phase-1' 2>/dev/null || true
-          if git rev-parse -q --verify phase-1 >/dev/null; then ./tools/creative-check.sh phase-1; else echo "no phase-1 tag, skipped"; fi
+          git fetch --tags origin 2>/dev/null || true
+          if git rev-parse -q --verify ui-classic >/dev/null; then ./tools/creative-check.sh ui-classic; else echo "no ui-classic tag, skipped"; fi
       - name: Headless contract smoke + determinism
         run: |
           node headless/run.js --seed 9 --night 1 --ticks 3000 --out a.jsonl

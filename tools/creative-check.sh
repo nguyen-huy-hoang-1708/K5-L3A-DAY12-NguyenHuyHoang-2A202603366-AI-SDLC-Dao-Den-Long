@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # Proof that creative additions (client-only, in web/) do not change contract headless output.
 #  1) Static: the headless path (headless/, src/) never imports anything from web/.
-#  2) Dynamic: headless output is byte-identical between BASE (default: tag phase-1) and the working tree,
+#  2) Dynamic: headless output is byte-identical between BASE (default: tag ui-classic) and the working tree,
 #     for every fixture in tests/scenarios and full default nights on several seeds.
-# Usage: tools/creative-check.sh [base-ref]
+# Usage: tools/creative-check.sh [base-ref]   (default: tag ui-classic = Phase 1 before the xianxia UI)
 set -u
 cd "$(dirname "$0")/.."
-BASE=${1:-phase-1}
+BASE=${1:-ui-classic}
 echo "== creative-check: base=$BASE ($(git rev-parse --short "$BASE")) vs HEAD=$(git rev-parse --short HEAD)$(git diff --quiet -- src headless || echo ' +uncommitted')"
 fail=0
 if grep -rnE "from ['\"][./]*web/|require\(['\"][./]*web/" src headless; then echo "FAIL: headless path imports web/"; fail=1; else echo "ok   headless/ and src/ do not import web/"; fi
