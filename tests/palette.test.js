@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { PALETTE, ambientIntensity } from '../web/palette.js';
+import { PALETTE, PALETTE_CB, ambientIntensity } from '../web/palette.js';
 
 const TICKET = {
   sky: '#0E1430', fog: '#1B2350', grass: '#2F5D50', sand: '#C9B48A', wood: '#6B4A2F', cloudSea: '#12384A',
@@ -31,4 +31,11 @@ test('client uses the palette module for listed elements (no stray hard-coded sk
   assert.match(src, /ambientIntensity\(/);
   assert.match(src, /PALETTE\.sky/);
   assert.match(src, /PALETTE\.fog/);
+});
+
+test('P3-13 colour-blind palette: shade rim/eyes #00B3FF, UI warning #FFFFFF', () => {
+  assert.deepEqual({ ...PALETTE_CB }, { shadeRim: '#00B3FF', uiDanger: '#FFFFFF' });
+  const src = fs.readFileSync(new URL('../web/main.js', import.meta.url), 'utf8');
+  assert.match(src, /PALETTE_CB/);
+  assert.match(src, /colorblind/);
 });

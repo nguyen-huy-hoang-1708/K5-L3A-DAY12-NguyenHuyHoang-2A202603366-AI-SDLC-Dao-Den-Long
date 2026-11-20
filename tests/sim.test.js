@@ -95,7 +95,7 @@ test('partial deposit keeps lantern unlit and lantern remembers progress', () =>
   assert.deepEqual(evs.map((e) => e.name), ['deposit']);
   assert.equal(g.lanterns[0].deposited, 3);
   assert.equal(g.lanterns[0].lit, false);
-  assert.equal(g.score, 30);
+  assert.equal(g.score, 15); // Ticket-03: +5 per mote
 });
 
 test('deposit never exceeds lantern_cost; surplus stays carried', () => {
@@ -106,10 +106,15 @@ test('deposit never exceeds lantern_cost; surplus stays carried', () => {
   assert.equal(g.lanterns[0].lit, true);
 });
 
-test('nearest unlit lantern in range wins; lit lanterns are skipped', () => {
+test('interact: nearest receivable lantern wins; full lanterns are skipped (Ticket-03)', () => {
+  // Was "lit lanterns are skipped" — Ticket-03 lets lit lanterns take fuel unless they are full.
   const lanterns = [{ id: 'L1', pos: [0, 0, 1], lit: true }, { id: 'L2', pos: [0, 0, 1.9] }, { id: 'L3', pos: [0, 0, -1] }];
   const g = createGame({ seed: 1, scenario: { ...EMPTY, player: { carried: 1 }, lanterns } });
+  g.lanterns[0].fuelU = 6001; // exactly full (6000) after this tick's decay
   assert.equal(run(g, 1, { ...idle, interact: true })[0].data.lantern_id, 'L3');
+  const h = createGame({ seed: 1, scenario: { ...EMPTY, player: { carried: 1 }, lanterns } });
+  const e = run(h, 1, { ...idle, interact: true })[0];
+  assert.deepEqual([e.name, e.data.lantern_id], ['refuel', 'L1'], 'not full -> refuel the nearest (tie -> lower id)');
 });
 
 test('interact outside 2.0 m does nothing', () => {
@@ -178,20 +183,57 @@ test('P2-16 priority: no flames beats all lanterns lit', () => {
   assert.deepEqual(run(g, 1).find((e) => e.name === 'game_over').data, { result: 'lost', reason: 'no_flames' });
 });
 
-test('P2-9 lighting a lantern evicts a shade touching Mây: no damage, still a win', () => {
+test('P2-9 lighting a lantern evicts a shade touching Mây: no damage (Ticket-03: no early win any more)', () => {
   const lanterns = [{ id: 'L1', deposited: 9 }, ...[2, 3, 4, 5].map((i) => ({ id: `L${i}`, lit: true }))];
   const h = createGame({ seed: 1, scenario: { ...EMPTY, player: { pos: [0, 0, 23], carried: 1, flames: 1 }, lanterns, shades: [{ pos: [0, 1, 23.5] }] } });
-  const evs = run(h, 1, { ...idle, interact: true });
+  const evs = run(h, 30, { ...idle, interact: true });
   assert.equal(evs.filter((e) => e.name === 'player_hit').length, 0);
-  assert.equal(evs.find((e) => e.name === 'game_over').data.result, 'won');
+  assert.equal(evs.filter((e) => e.name === 'game_over').length, 0);
 });
 
-test('P2-16 win on the very tick time runs out counts as a win', () => {
-  const lanterns = [{ id: 'L1', deposited: 9 }, ...[2, 3, 4, 5].map((i) => ({ id: `L${i}`, lit: true }))];
-  const g = createGame({ seed: 1, scenario: { ...EMPTY, player: { pos: [0, 0, 23], carried: 1 }, lanterns, time_left_s: 1 / 60 } });
-  const go = run(g, 1, { ...idle, interact: true }).find((e) => e.name === 'game_over');
-  assert.deepEqual(go.data, { result: 'won', reason: 'all_lit' });
-  assert.equal(g.score, 10 + 100 + 0 + 150);
+test('P3-9 dawn tick: 3/5 lit wins, 2/5 loses; no flames always loses first', () => {
+  const mk = (n, flames = 3) => createGame({ seed: 1, scenario: { ...EMPTY, player: { flames }, time_left_s: 1 / 60, lanterns: Array.from({ length: n }, (_, i) => ({ id: `L${i + 1}`, lit: true })) } });
+  assert.deepEqual(run(mk(3), 1).find((e) => e.name === 'game_over').data, { result: 'won', reason: 'dawn_survived' });
+  assert.deepEqual(run(mk(2), 1).find((e) => e.name === 'game_over').data, { result: 'lost', reason: 'dawn' });
+  assert.deepEqual(run(mk(5, 0), 1).find((e) => e.name === 'game_over').data, { result: 'lost', reason: 'no_flames' });
+  for (const [night, need] of [[2, 4], [3, 5]]) {
+    const g = createGame({ seed: 1, night, scenario: { ...EMPTY, wind_enabled: false, time_left_s: 1 / 60, lanterns: Array.from({ length: need }, (_, i) => ({ id: `L${i + 1}`, lit: true })) } });
+    assert.equal(run(g, 1).find((e) => e.name === 'game_over').data.result, 'won', `night ${night} needs ${need}`);
+    const h = createGame({ seed: 1, night, scenario: { ...EMPTY, wind_enabled: false, time_left_s: 1 / 60, lanterns: Array.from({ length: need - 1 }, (_, i) => ({ id: `L${i + 1}`, lit: true })) } });
+    assert.equal(run(h, 1).find((e) => e.name === 'game_over').data.result, 'lost');
+  }
+});
+
+test('P3-6 fuel < 30 loses the safe zone; exactly 30 keeps it', () => {
+  for (const [fuel, blocked] of [[30.02, true], [29.9, false]]) {
+    const g = createGame({ seed: 1, scenario: { ...EMPTY, player: { pos: [0, 0, 25] }, lanterns: [{ id: 'L1', lit: true, fuel }], shades: [{ id: 'S1', pos: [0, 1, 31], state: 'chase' }] } });
+    run(g, 1); // fuel 30.02 -> 30.003 after one tick (still >= 30)
+    const d = Math.hypot(g.shades[0].pos[0], g.shades[0].pos[2] - 25);
+    assert.equal(d >= 6 - 1e-9, blocked, `fuel ${fuel}: d=${d}`);
+  }
+});
+
+test('P3-8 pulse on a draining shade: +15 total, stunned; refuel >= 30 evicts draining shades', () => {
+  const g = createGame({ seed: 1, scenario: { ...EMPTY, player: { pos: [0, 0, 22], carried: 3 }, lanterns: [{ id: 'L1', lit: true, fuel: 20 }], shades: [{ id: 'S1', pos: [0, 1, 24], state: 'drain', target_lantern_id: 'L1' }] } });
+  const e = run(g, 1, { ...idle, pulse: true });
+  assert.deepEqual(e.find((x) => x.name === 'pulse').data.stunned_ids, ['S1']);
+  assert.equal(g.score, 15);
+  const h = createGame({ seed: 1, scenario: { ...EMPTY, player: { pos: [0, 0, 23], carried: 3 }, lanterns: [{ id: 'L1', lit: true, fuel: 20 }], shades: [{ id: 'S1', pos: [0, 1, 26], state: 'drain', target_lantern_id: 'L1' }] } });
+  const ev = run(h, 1, { ...idle, interact: true });
+  assert.deepEqual(ev.find((x) => x.name === 'refuel').data.amount, 3);
+  assert.equal(h.shades[0].state, 'wander');
+  run(h, 30);
+  assert.ok(Math.hypot(h.shades[0].pos[0], h.shades[0].pos[2] - 25) >= 6 - 1e-6, 'pushed to the 6 m edge');
+});
+
+test('P3-11 capacity = 10 + 2 x successful lights, max 20', () => {
+  const g = createGame({ seed: 1, scenario: { ...EMPTY, player: { successful_lights: 3 }, motes: Array.from({ length: 30 }, () => [0, 0, 0.5]) } });
+  run(g, 1);
+  assert.equal(g.player.carried, 16);
+  const h = createGame({ seed: 1, scenario: { ...EMPTY, player: { successful_lights: 9 }, motes: Array.from({ length: 30 }, () => [0, 0, 0.5]) } });
+  run(h, 1);
+  assert.equal(h.player.carried, 20);
+  assert.equal(snapshot(h).player.capacity, 20);
 });
 
 test('map sanity: standard lantern counts, starts on ground, pads land on target island', () => {
