@@ -1,0 +1,15 @@
+{
+  "name": "dao-den-long",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Đảo Đèn Lồng — 3D web game + headless sim (Day 12 AI SDLC lab)",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "start": "node tools/serve.js",
+    "headless": "node headless/run.js",
+    "test": "node tools/check-contract.js && node --test tests/*.test.js",
+    "check-contract": "node tools/check-contract.js"
+  },
+  "license": "MIT"
+}
