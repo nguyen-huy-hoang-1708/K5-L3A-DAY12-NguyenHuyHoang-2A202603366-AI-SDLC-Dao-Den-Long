@@ -1,0 +1,25 @@
+{
+  "nights": 10,
+  "crashes": 0,
+  "results": [
+    "lost",
+    "lost",
+    "lost",
+    "lost",
+    "lost",
+    "lost",
+    "lost",
+    "lost",
+    "lost",
+    "lost"
+  ],
+  "mem_start_mb": 44.6,
+  "mem_end_mb": 74.1,
+  "heap_start_mb": 3.8,
+  "heap_end_mb": 4.3,
+  "duration_s": 0.2,
+  "seed": 7,
+  "gc_exposed": true,
+  "jitless": false,
+  "node": "v24.4.0"
+}

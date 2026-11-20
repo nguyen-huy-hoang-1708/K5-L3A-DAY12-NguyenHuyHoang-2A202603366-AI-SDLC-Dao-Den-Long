@@ -1,0 +1,16 @@
+{
+  "contract_version": "1.3",
+  "avg_fps": 236.8,
+  "p1_low_fps": 145.7,
+  "frame_ms_p95": 4.8,
+  "frames": 7104,
+  "load_ms": 2164,
+  "peak_mem_mb": 1210,
+  "vsync_off": true,
+  "renderer": "three.js r160 WebGL2 + UnrealBloom · ANGLE (Apple, ANGLE Metal Renderer: Apple M1 Pro, Unspecified Version) · Chrome/157.0.0.0",
+  "os": "Darwin 24.6.0 (darwin arm64), Apple M1 Pro, 32 GB RAM",
+  "seed": 42,
+  "duration_s": 30,
+  "window": "window, drawable 1280x720",
+  "peak_mem_note": "sum of RSS of all Chrome processes of the bench profile + the Node static server (web build)"
+}
