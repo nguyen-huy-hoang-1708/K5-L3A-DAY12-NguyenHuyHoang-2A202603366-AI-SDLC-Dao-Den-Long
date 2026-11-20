@@ -1,0 +1,11 @@
+caught (1 failing)  M1 safe zone disabled
+caught (1 failing)  M2 deposit not capped
+caught (3 failing)  M3 no invulnerability
+caught (3 failing)  M4 pulse free + no cooldown
+caught (1 failing)  M5 no mote score
+caught (1 failing)  M6 wrong yaw sign
+caught (1 failing)  M7 stun 1s instead of 3s
+caught (1 failing)  M8 drop rounds up
+caught (1 failing)  M9 dawn never ends the night
+caught (4 failing)  M10 speed drifts from contract
+ALL MUTATIONS CAUGHT

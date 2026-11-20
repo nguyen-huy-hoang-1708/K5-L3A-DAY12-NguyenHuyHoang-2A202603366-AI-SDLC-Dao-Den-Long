@@ -1,0 +1,38 @@
+{
+  "mode": "lose",
+  "seed": 7,
+  "speed": 4,
+  "final": {
+    "tick": 772,
+    "state": "lost",
+    "score": 10,
+    "flames": 0,
+    "lit": 0,
+    "hud": [
+      "Lửa 0",
+      "Đom đóm 1/10",
+      "Đèn 0/5",
+      "Còn 4:48",
+      "Điểm 10",
+      "Tỏa sáng cần 2 đom đóm"
+    ]
+  },
+  "after_replay": {
+    "tick": 163,
+    "state": "playing",
+    "score": 0,
+    "lit": 0,
+    "flames": 3
+  },
+  "console_errors": [],
+  "samples": [
+    {
+      "t": 291,
+      "state": "playing",
+      "score": 0,
+      "carried": 0,
+      "flames": 3,
+      "lit": 0
+    }
+  ]
+}

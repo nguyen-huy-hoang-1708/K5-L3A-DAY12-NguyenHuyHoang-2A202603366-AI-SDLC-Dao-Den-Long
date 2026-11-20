@@ -1,0 +1,42 @@
+game.contract.json tuning matches src/sim.js TUNING
+✔ AC1 idle: exact tick count, time_left, end line last (35.8355ms)
+✔ AC2 walk forward 60 ticks at 6 m/s -> z = 6 (32.905875ms)
+✔ AC4 pickup when within pickup_radius (tick 40 at z = 4) (33.20725ms)
+✔ AC6 deposit lantern_cost into L1 lights it (+100) (33.359791ms)
+✔ AC7 + AC15 win: lighting the last lantern ends with all_lit and bonus (32.324ms)
+✔ AC8 shade chases and hits: flames -1, drops floor(carried*0.5) (32.764334ms)
+✔ AC9 invulnerability: next hit exactly invuln_s later (32.768584ms)
+✔ AC10 last flame lost -> game_over lost no_flames, stops early (32.919875ms)
+✔ AC11 time runs out -> lost dawn at tick 60 when time_left_s = 1 (31.089042ms)
+✔ AC12 + AC13 pulse stuns & pushes in radius, costs light, respects cooldown (34.968833ms)
+✔ AC14 shades never enter safe_radius of a lit lantern; player inside is safe (35.404958ms)
+✔ AC15 scenario setup emits no events and awards no points (31.743458ms)
+✔ AC18 defaults: 30 motes, 2 shades, shade_spawned every 30 s with fresh ids (44.257291ms)
+✔ AC3 cam_yaw_deg 90 rotates move [0,1] to +X (1.468334ms)
+✔ move vectors longer than 1 are normalized (0.260792ms)
+✔ player is kept on the island (fall disabled) (1.697792ms)
+✔ jump: leaves ground, lands, only from ground (0.217416ms)
+✔ AC5 carry_capacity limits pickup (0.268208ms)
+✔ partial deposit keeps lantern unlit (0.119333ms)
+✔ deposit never exceeds lantern_cost; surplus stays carried (0.113417ms)
+✔ nearest unlit lantern in range wins; lit lanterns are skipped (0.096458ms)
+✔ interact outside interact_radius does nothing (0.084042ms)
+✔ AC13 pulse without enough light emits nothing (0.185292ms)
+✔ pulse cooldown: second pulse allowed exactly pulse_cooldown_s later (0.242959ms)
+✔ hit_drop_ratio rounds down (0.085833ms)
+✔ stunned shade does not hit (0.106833ms)
+✔ scenario shade ids: given ids kept, missing ids filled without collision (0.090292ms)
+✔ inputs: held values persist, button edges, strict tick order (0.362917ms)
+✔ AC17 CLI: malformed inputs/scenario -> exit 2 with stderr (129.238625ms)
+✔ CLI: missing required args -> non-zero exit (32.3275ms)
+✔ AC16 determinism: same seed/scenario/inputs -> byte-identical output (146.229708ms)
+✔ AC16 determinism on every fixture scenario (809.834041ms)
+✔ output lines: coords rounded to 3 decimals; end is last (35.300125ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1211.914666
