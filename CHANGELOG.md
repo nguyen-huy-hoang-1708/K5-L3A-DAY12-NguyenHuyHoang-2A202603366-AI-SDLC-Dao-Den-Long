@@ -1,5 +1,11 @@
 # Changelog
 
+## phase-2 — Ticket-02 "Ba hòn đảo" + Test Contract v1.1
+- Số chuẩn thay mọi số tự chọn của Phase 1 (`game.contract.json` v1.1 + 5 khóa mới); bản đồ chuẩn 3 Đêm (`src/maps.js`).
+- Luật mới: lướt, nhảy chuẩn, rơi khỏi đảo + hồi sinh, đom đóm rơi có TTL, trạng thái Bóng Mực (spawning/wander/chase/recoil/stunned), đẩy ra khỏi vùng an toàn, Gió Lạc, Bùa Gió, gió mạnh, tạm dừng; thứ tự 11 bước mỗi tick.
+- Client: chuỗi 3 Đêm (menu, giới thiệu Ông Đăng, kết quả, Bình Minh), tạm dừng + cài đặt lưu localStorage, HUD theo bố cục ticket, mũi tên tới đèn, bảng màu chuẩn, nhạc nền + hiệu ứng âm thanh.
+- 65 test (27 scenario), 26 mutation, creative-check mới (bỏ `web/`), playtest chiến dịch + đo FPS GPU.
+
 ## Giao diện tiên hiệp (sau tag phase-1, chỉ client)
 - Viết lại `web/main.js` + `web/index.html`: đảo nổi giữa biển mây, núi trong sương, bloom, đèn lồng giấy đỏ + cột sáng, trận pháp, Quang Chưởng, Bóng Mực mực tím, hoa đào, pháo hoa thắng, HUD sơn mài viền vàng.
 - `src/`, `headless/`, `game.contract.json` không đổi → đầu ra headless không đổi (33/33 test).

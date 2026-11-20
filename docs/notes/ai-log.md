@@ -32,6 +32,26 @@ Công cụ: **Claude Code** (desktop app, model Claude Opus 5.5). Harness: [AGEN
 - Theo yêu cầu của chủ dự án, xoá dòng `Co-Authored-By: Claude` khỏi 8 commit Phase 1 (`git filter-branch --msg-filter`), **nội dung code không đổi** (cùng git tree), rồi gắn lại tag `phase-1` và force-push trước hạn Phase 1. Việc dùng AI vẫn được ghi đầy đủ trong file này và `CREDITS.md`.
 - Lưu ý RULES.md §7 ("không viết lại lịch sử sau khi gắn tag"): việc này làm trước hạn phase, có backup nhánh `backup/before-rewrite` trên máy; mã commit cũ → mới: `0066d6f`→`45de48c` (tag `ui-classic`), `ed5d7fb`→`d2174db`.
 
+## Phase 2
+
+### Lời nhắc chính
+- Dán nguyên văn Ticket-02 vào phiên; yêu cầu làm theo hướng dẫn lab, không push.
+
+### Trình tự
+1. Viết `docs/notes/phase-2.md` trước: bảng **thay đổi so với Phase 1** (test cũ bị ảnh hưởng), 23 giả định, 22 tiêu chí nghiệm thu.
+2. Viết lại `src/sim.js` theo đúng 11 bước của ticket + `src/maps.js` → CLI v1.1 → sửa test Phase 1 theo số chuẩn → scenario cho mỗi tính năng mới → mutation → client → playtest → proof.
+
+### AI sai ở đâu & cách phát hiện
+| # | Sai | Phát hiện bằng | Sửa / chỉnh harness |
+|---|---|---|---|
+| 7 | Bóng Mực hết `recoil` lại đuổi thêm một bước trong cùng tick (đi 2 bước/tick) | Tính tay lịch trúng đòn trước khi viết test | Cờ `busy` (recoil/evict thay thế AI trong tick đó) |
+| 8 | Test bục phóng Đêm 2 kỳ vọng bay cao > 5 m, thực tế vy²/2g = 4.9 m | Test đỏ → debug quỹ đạo → kỳ vọng sai, code đúng | Sửa ngưỡng; thêm quy tắc vào AGENTS: kỳ vọng phải tính tay từ số chuẩn |
+| 9 | Test "lửa hết cùng tick thắp đèn" thực ra kiểm tra thắng (vùng an toàn đẩy Bóng ra) — tên test sai ý | Đọc lại test sau khi xanh | Viết lại thành 2 test đúng ý (ưu tiên no_flames; evict không sát thương) |
+| 10 | Mutation check báo 2 đột biến sống sót (bỏ bất tử; hồi sinh ngay) và 1 không áp dụng được (lịch Đêm 2 nằm ở `maps.js`) | `tools/mutation-check.sh` | Thêm test 2 Bóng cùng chạm, test chờ 60 tick, test lịch Đêm 2/3; script mutation nhận file `maps.js` |
+| 11 | Bot playtest trốn trong vùng an toàn chờ Bóng bỏ đi → kẹt cả đêm (Bóng ở mép 6 m vẫn < 18 m nên không bỏ đuổi) | Ảnh cuối playtest | Bỏ luật chờ của bot; ghi nhận bot chưa thắng được Đêm 2/3 (chưa đạt một phần) |
+| 12 | Ảnh `07-dawn.png` được chụp dù chưa tới Bình Minh (ảnh sai nội dung) | Xem lại danh sách ảnh | Chỉ chụp khi `screen === 'dawn'`; chuyển ảnh sai ra khỏi bằng chứng |
+
 ### Token / chi phí (ước tính)
 - Không có số đo chính xác trong phiên; ước tính theo độ dài phiên: khoảng **60–80k token output** và **~2–3M token input** (phần lớn là ngữ cảnh được cache đọc lại mỗi lượt). Cập nhật số thật từ trang usage của Claude nếu cần.
 - Cách tiết kiệm: đọc tài liệu lab một lần và tóm tắt vào notes; một module luật dùng chung (không viết luật hai lần); không thêm dependency (không `npm install`, không đọc tài liệu thư viện); dùng script sinh bằng chứng thay vì chụp/đọc ảnh nhiều lần; chỉ đọc 4 ảnh để kiểm tra trực quan.
+- Phase 2 (ước tính theo độ dài phiên): khoảng **120–160k token output**, **~6–9M token input** (chủ yếu ngữ cảnh được cache). Tiết kiệm: viết spec + bảng thay đổi trước để agent không đoán; một lần viết lại sim thay vì vá nhiều lần; test chạy qua CLI thật; bot playtest chạy ngầm chỉ đọc ảnh cần thiết (≈ 8 ảnh); không đọc lại file lớn khi không cần.
