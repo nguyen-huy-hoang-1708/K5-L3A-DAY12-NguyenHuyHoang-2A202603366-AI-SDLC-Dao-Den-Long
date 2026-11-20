@@ -23,6 +23,11 @@ Công cụ: **Claude Code** (desktop app, model Claude Opus 5.5). Harness: [AGEN
 | 5 | Client lần đầu quá tối, khó nhìn | Ảnh chụp trong trình duyệt | Tăng ánh sáng (chỉ client) |
 | 6 | Trình duyệt tích hợp bị ẩn nên `requestAnimationFrame` không chạy, game đứng ở tick 0 | Đọc `window.__game.tick` sau khi giữ phím | Viết `tools/playtest.js` dùng Chrome headless + CDP, phím thật |
 
+### Yêu cầu thêm: giao diện tiên hiệp
+- Lời nhắc: "chỉnh sửa giao diện game cho đẹp mắt giống các game kiếm hiệp, chưởng tu tiên đồ hoạ bắt mắt".
+- Ràng buộc tự đặt: chỉ sửa `web/`, không đụng `src/sim.js` → test/headless không đổi; giữ màu theo PRD (vàng cam = tốt, tím đen = nguy hiểm, không bạo lực); không dùng asset ngoài (mọi texture vẽ bằng Canvas, âm thanh tổng hợp).
+- AI sai: dòng đổi màu bụi linh khí truyền `Vector3` vào `Color.lerp` (sẽ ra NaN) — phát hiện khi đọc lại diff trước khi chạy, đã sửa. Kiểm chứng: playtest Chrome headless thắng + thua, 0 lỗi console, ảnh trong `docs/proof/phase-1/playtest/`.
+
 ### Token / chi phí (ước tính)
 - Không có số đo chính xác trong phiên; ước tính theo độ dài phiên: khoảng **60–80k token output** và **~2–3M token input** (phần lớn là ngữ cảnh được cache đọc lại mỗi lượt). Cập nhật số thật từ trang usage của Claude nếu cần.
 - Cách tiết kiệm: đọc tài liệu lab một lần và tóm tắt vào notes; một module luật dùng chung (không viết luật hai lần); không thêm dependency (không `npm install`, không đọc tài liệu thư viện); dùng script sinh bằng chứng thay vì chụp/đọc ảnh nhiều lần; chỉ đọc 4 ảnh để kiểm tra trực quan.

@@ -35,6 +35,10 @@ node tools/playtest.js --mode win --out docs/proof/phase-1/playtest && node tool
 `tools/mutation-check.sh` cài 10 lỗi cố ý vào `src/sim.js` (tắt vùng an toàn, nạp vượt, bỏ bất tử, pulse miễn phí, sai dấu yaw, stun 1 s, làm tròn lên, không kết thúc lúc sáng, lệch tốc độ…). Kết quả: [mutation-check.txt](mutation-check.txt) — **10/10 bị bắt**.
 Lần chạy đầu, lỗi "nạp vượt `lantern_cost`" **sống sót** (không test nào bắt) → đã thêm test `deposit never exceeds lantern_cost`.
 
+## Ghi chú về ảnh playtest
+
+Ảnh trong `playtest/` được chụp lại sau khi đổi giao diện sang phong cách tiên hiệp (chỉ client `web/`). Luật chơi và bằng chứng headless không đổi.
+
 ## Chưa đạt / giới hạn đã biết
 
 - Playtest dùng bot đơn giản trong Chrome headless với `?speed=4` (chạy 4 bước sim mỗi tick hình) để nhanh; luật không đổi. Chưa đo FPS trên máy thật (Phase 1 không yêu cầu số đo).

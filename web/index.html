@@ -4,36 +4,108 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Đảo Đèn Lồng</title>
+  <!-- Optional web fonts (Vietnamese subset). The game works offline with the serif fallbacks. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Noto+Serif:wght@400;600&display=swap" />
   <style>
-    html, body { margin: 0; height: 100%; overflow: hidden; background: #120a1f; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #ffe9c2; }
+    :root {
+      --gold: #f3c76a; --gold-2: #ffe6a8; --gold-dim: rgba(243, 199, 106, .45);
+      --lacquer: #1b0d24; --lacquer-2: #2a1236; --red: #b8322a; --ink: #12061c; --qi: #8fd3ff;
+      --serif: "Noto Serif", "Songti SC", "STSong", "Times New Roman", Georgia, serif;
+      --title: "Cormorant Garamond", "Noto Serif", Georgia, serif;
+    }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #0b0614; font-family: var(--serif); color: #fbe9c8; }
     canvas { display: block; }
-    #hud { position: fixed; top: 12px; left: 12px; right: 12px; display: flex; gap: 10px; flex-wrap: wrap; pointer-events: none; }
-    .pill { background: rgba(20, 10, 35, .72); border: 1px solid rgba(255, 190, 110, .35); border-radius: 12px; padding: 6px 12px; font-size: 15px; font-variant-numeric: tabular-nums; }
-    .pill b { color: #ffc46b; }
-    #hint { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 13px; opacity: .85; background: rgba(20,10,35,.6); padding: 6px 12px; border-radius: 10px; pointer-events: none; text-align: center; }
-    #prompt { position: fixed; bottom: 52px; left: 50%; transform: translateX(-50%); font-size: 16px; color: #fff3d6; text-shadow: 0 0 8px #ff9a3c; pointer-events: none; }
-    #overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(10, 5, 20, .55); }
+
+    /* ---- HUD ---- */
+    #hud { position: fixed; top: 14px; left: 14px; right: 14px; display: flex; justify-content: space-between; gap: 10px; pointer-events: none; flex-wrap: wrap; }
+    .col { display: flex; flex-direction: column; gap: 8px; }
+    .col.right { align-items: flex-end; }
+    .pill {
+      position: relative; display: flex; align-items: center; gap: 8px; padding: 7px 14px 7px 12px; font-size: 14px;
+      background: linear-gradient(180deg, rgba(42, 18, 54, .88), rgba(18, 8, 28, .88));
+      border: 1px solid var(--gold-dim); border-radius: 4px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,.6), inset 0 0 12px rgba(243, 199, 106, .08), 0 6px 18px rgba(0,0,0,.35);
+      font-variant-numeric: tabular-nums;
+    }
+    .pill::before, .pill::after { content: ""; position: absolute; width: 8px; height: 8px; border: 2px solid var(--gold); }
+    .pill::before { top: -3px; left: -3px; border-right: 0; border-bottom: 0; }
+    .pill::after { bottom: -3px; right: -3px; border-left: 0; border-top: 0; }
+    .lbl { color: var(--gold); letter-spacing: .06em; font-size: 12px; text-transform: uppercase; margin-right: 2px; }
+    .num { color: #fff6e0; font-weight: 600; }
+    .num.big { font-size: 20px; text-shadow: 0 0 10px rgba(255, 180, 80, .6); }
+    .orb { display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: #3a2a40; box-shadow: inset 0 0 3px #000; }
+    .orb.on { background: radial-gradient(circle at 40% 35%, #fff4c0, #ffae3c 45%, #e0521f 80%); box-shadow: 0 0 10px #ff9a3c, 0 0 2px #fff; animation: flick 1.4s ease-in-out infinite; }
+    @keyframes flick { 50% { transform: scale(1.12); filter: brightness(1.2); } }
+    .bar { position: relative; width: 120px; height: 9px; border: 1px solid var(--gold-dim); background: rgba(0,0,0,.5); border-radius: 5px; overflow: hidden; }
+    .bar > span { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #ffcf6a, #fff2b0); box-shadow: 0 0 10px #ffd27a; transition: width .2s; }
+    .lan { display: inline-block; width: 12px; height: 16px; border-radius: 45%; background: #3a1a28; border-top: 2px solid #6a4a30; border-bottom: 2px solid #6a4a30; }
+    .lan.on { background: radial-gradient(circle at 50% 45%, #fff0b0, #ff7a2a 55%, #b0281a); border-color: var(--gold); box-shadow: 0 0 12px #ff8a2a; }
+    .skill { opacity: .7; }
+    .skill.ready { opacity: 1; border-color: var(--gold); box-shadow: 0 0 16px rgba(255, 200, 90, .45), inset 0 0 12px rgba(243, 199, 106, .2); }
+    .key { display: inline-grid; place-items: center; width: 22px; height: 22px; border: 1px solid var(--gold); border-radius: 50%; color: var(--gold-2); font-weight: 700; font-size: 12px; }
+    .flash { animation: flash .45s ease-out; }
+    @keyframes flash { from { box-shadow: 0 0 0 3px rgba(190, 80, 255, .9), 0 0 24px #a040ff; } }
+
+    #prompt { position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%); font-size: 17px; color: #fff3d6; text-shadow: 0 0 10px #ff9a3c, 0 0 2px #000; pointer-events: none; letter-spacing: .02em; text-align: center; }
+    #hint { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); font-size: 12.5px; color: #e8d6b8; opacity: .85; background: rgba(18, 8, 28, .65); border: 1px solid rgba(243,199,106,.2); padding: 6px 14px; border-radius: 4px; pointer-events: none; text-align: center; max-width: calc(100vw - 32px); }
+    #banner { position: fixed; top: 22%; left: 50%; transform: translate(-50%, -10px); font-family: var(--title); font-size: 34px; font-weight: 700; color: var(--gold-2); text-shadow: 0 0 18px #ff9a3c, 0 2px 0 #3a1a08; opacity: 0; transition: opacity .35s, transform .35s; pointer-events: none; white-space: nowrap; letter-spacing: .04em; }
+    #banner.show { opacity: 1; transform: translate(-50%, 0); }
+    #banner.danger { color: #e3b8ff; text-shadow: 0 0 18px #8a2be2, 0 2px 0 #1a0630; }
+    #vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, rgba(10, 4, 20, .55) 100%); }
+    #vignette.hit { animation: hit .6s ease-out; }
+    @keyframes hit { from { background: radial-gradient(ellipse at center, rgba(120, 30, 200, .15) 30%, rgba(80, 10, 140, .85) 100%); } }
+
+    /* ---- title / end card ---- */
+    #overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: radial-gradient(ellipse at center, rgba(20, 8, 32, .35), rgba(6, 2, 12, .8)); padding: 16px; }
     #overlay.hidden { display: none; }
-    .card { text-align: center; max-width: 520px; padding: 28px 32px; background: rgba(28, 14, 46, .92); border: 1px solid rgba(255, 190, 110, .45); border-radius: 18px; box-shadow: 0 0 40px rgba(255, 150, 60, .25); }
-    .card h1 { margin: 0 0 6px; color: #ffc46b; font-size: 34px; }
-    .card p { line-height: 1.5; margin: 8px 0; }
-    .card kbd { background: #3a2456; border-radius: 5px; padding: 1px 6px; font-family: inherit; }
-    .flash { animation: flash .35s ease-out; }
-    @keyframes flash { from { box-shadow: 0 0 0 4px rgba(255,80,120,.8);} to { box-shadow: none; } }
+    .card {
+      position: relative; text-align: center; max-width: 600px; padding: 34px 40px 30px;
+      background: linear-gradient(180deg, rgba(38, 16, 50, .95), rgba(16, 6, 26, .96));
+      border: 1px solid var(--gold); outline: 1px solid rgba(243,199,106,.35); outline-offset: 6px;
+      box-shadow: 0 0 60px rgba(255, 150, 60, .25), inset 0 0 40px rgba(243, 199, 106, .08);
+    }
+    .card h1 { margin: 6px 0 2px; font-family: var(--title); font-size: 52px; line-height: 1.05; letter-spacing: .03em;
+      background: linear-gradient(180deg, #fff3c8 10%, #f3c76a 55%, #c9822a 90%); -webkit-background-clip: text; background-clip: text; color: transparent;
+      filter: drop-shadow(0 0 14px rgba(255, 160, 60, .45)); }
+    .subtitle { color: var(--gold); letter-spacing: .25em; text-transform: uppercase; font-size: 13px; }
+    .divider { height: 14px; margin: 14px auto 10px; width: 70%; background:
+      linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent) center / 100% 1px no-repeat,
+      radial-gradient(circle, var(--gold) 3px, transparent 4px) center / 14px 14px no-repeat; }
+    .card p { line-height: 1.65; margin: 8px 0; font-size: 15px; color: #f1e2c6; }
+    .card p.big { font-size: 22px; } .card p.big b { color: var(--gold-2); text-shadow: 0 0 10px #ff9a3c; }
+    .card p.sub { font-size: 13px; color: #c9b38e; }
+    .card b { color: var(--gold-2); }
+    .seal { position: absolute; top: -26px; left: 50%; transform: translateX(-50%) rotate(-4deg); width: 52px; height: 52px; display: grid; place-items: center;
+      background: var(--red); color: #ffe8c8; font-size: 30px; font-weight: 700; border: 2px solid #ffd9a0; border-radius: 6px; box-shadow: 0 4px 14px rgba(0,0,0,.5), 0 0 18px rgba(184, 50, 42, .6); }
+    .keys { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; margin: 14px 0 6px; font-size: 13px; color: #e2cfae; }
+    kbd { display: inline-block; min-width: 14px; padding: 1px 7px; border: 1px solid var(--gold-dim); border-bottom-width: 2px; border-radius: 4px; background: #2a1236; color: var(--gold-2); font-family: inherit; font-size: 12px; margin-right: 3px; }
+    .btn { margin-top: 16px; padding: 10px 30px; font-family: var(--title); font-size: 20px; font-weight: 700; letter-spacing: .08em; color: #2a0f06; cursor: pointer;
+      background: linear-gradient(180deg, #ffe6a8, #f3b54a 60%, #c97a20); border: 1px solid #fff0c8; border-radius: 3px; box-shadow: 0 0 22px rgba(255, 170, 60, .55); }
+    .btn:hover { filter: brightness(1.1); }
+    @media (max-width: 640px) { .card h1 { font-size: 38px; } .card { padding: 30px 20px 24px; } .bar { width: 70px; } #banner { font-size: 24px; } }
   </style>
   <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
 </head>
 <body>
+  <div id="vignette"></div>
   <div id="hud">
-    <div class="pill" id="h-flames">Lửa <b>3</b></div>
-    <div class="pill" id="h-carried">Đom đóm <b>0/10</b></div>
-    <div class="pill" id="h-lanterns">Đèn <b>0/5</b></div>
-    <div class="pill" id="h-time">Còn <b>5:00</b></div>
-    <div class="pill" id="h-score">Điểm <b>0</b></div>
-    <div class="pill" id="h-pulse">Tỏa sáng <b>sẵn sàng</b></div>
+    <div class="col">
+      <div class="pill" id="h-flames">Lửa <b>3</b></div>
+      <div class="pill" id="h-carried">Đom đóm <b>0/10</b></div>
+      <div class="pill skill" id="h-pulse">Quang Chưởng</div>
+    </div>
+    <div class="col">
+      <div class="pill" id="h-lanterns">Đèn <b>0/5</b></div>
+    </div>
+    <div class="col right">
+      <div class="pill" id="h-time">Còn <b>5:00</b></div>
+      <div class="pill" id="h-score">Điểm <b>0</b></div>
+    </div>
   </div>
+  <div id="banner"></div>
   <div id="prompt"></div>
-  <div id="hint">WASD di chuyển · Kéo chuột / Q Z xoay camera · Space nhảy · E nạp đèn · F tỏa sáng · M tắt/bật âm · R chơi lại</div>
+  <div id="hint">WASD di chuyển · Kéo chuột / Q Z xoay góc nhìn · Space khinh công · E thắp đèn · F Quang Chưởng · M âm thanh · R chơi lại</div>
   <div id="overlay"><div class="card" id="card"></div></div>
   <script type="module" src="./main.js"></script>
 </body>

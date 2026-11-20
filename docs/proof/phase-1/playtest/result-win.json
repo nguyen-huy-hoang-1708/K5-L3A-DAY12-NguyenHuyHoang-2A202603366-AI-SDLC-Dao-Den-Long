@@ -3,22 +3,22 @@
   "seed": 7,
   "speed": 4,
   "final": {
-    "tick": 4060,
+    "tick": 5388,
     "state": "won",
-    "score": 1202,
-    "flames": 1,
+    "score": 1420,
+    "flames": 2,
     "lit": 5,
     "hud": [
-      "Lửa 🔥",
-      "Đom đóm 0/10",
-      "Đèn 5/5",
-      "Còn 3:53",
-      "Điểm 1202",
-      "Tỏa sáng cần 2 đom đóm"
+      "Hồn Hỏa2",
+      "Đom đóm1/10",
+      "FQuang Chưởngcần 2 đom đóm",
+      "Đèn Lồng5/5",
+      "Canh Giờ3:31",
+      "Điểm1420"
     ]
   },
   "after_replay": {
-    "tick": 152,
+    "tick": 163,
     "state": "playing",
     "score": 0,
     "lit": 0,
@@ -27,7 +27,7 @@
   "console_errors": [],
   "samples": [
     {
-      "t": 283,
+      "t": 388,
       "state": "playing",
       "score": 0,
       "carried": 0,
@@ -35,99 +35,131 @@
       "lit": 0
     },
     {
-      "t": 763,
+      "t": 703,
       "state": "playing",
-      "score": 60,
+      "score": 50,
       "carried": 1,
-      "flames": 2,
+      "flames": 3,
       "lit": 0
     },
     {
-      "t": 1027,
+      "t": 1015,
       "state": "playing",
       "score": 110,
-      "carried": 6,
-      "flames": 2,
+      "carried": 1,
+      "flames": 3,
       "lit": 0
     },
     {
-      "t": 1423,
+      "t": 1267,
       "state": "playing",
-      "score": 270,
-      "carried": 1,
-      "flames": 2,
-      "lit": 1
-    },
-    {
-      "t": 1691,
-      "state": "playing",
-      "score": 280,
-      "carried": 2,
-      "flames": 2,
-      "lit": 1
-    },
-    {
-      "t": 2011,
-      "state": "playing",
-      "score": 410,
-      "carried": 0,
-      "flames": 2,
-      "lit": 2
-    },
-    {
-      "t": 2283,
-      "state": "playing",
-      "score": 450,
+      "score": 140,
       "carried": 4,
+      "flames": 3,
+      "lit": 0
+    },
+    {
+      "t": 1779,
+      "state": "playing",
+      "score": 260,
+      "carried": 1,
+      "flames": 3,
+      "lit": 1
+    },
+    {
+      "t": 2063,
+      "state": "playing",
+      "score": 330,
+      "carried": 2,
+      "flames": 3,
+      "lit": 1
+    },
+    {
+      "t": 2371,
+      "state": "playing",
+      "score": 390,
+      "carried": 2,
+      "flames": 3,
+      "lit": 1
+    },
+    {
+      "t": 2587,
+      "state": "playing",
+      "score": 390,
+      "carried": 1,
+      "flames": 2,
+      "lit": 1
+    },
+    {
+      "t": 2847,
+      "state": "playing",
+      "score": 440,
+      "carried": 2,
+      "flames": 2,
+      "lit": 1
+    },
+    {
+      "t": 3139,
+      "state": "playing",
+      "score": 470,
+      "carried": 5,
+      "flames": 2,
+      "lit": 1
+    },
+    {
+      "t": 3439,
+      "state": "playing",
+      "score": 580,
+      "carried": 1,
       "flames": 2,
       "lit": 2
     },
     {
-      "t": 2659,
+      "t": 3735,
       "state": "playing",
-      "score": 570,
-      "carried": 1,
-      "flames": 1,
-      "lit": 3
+      "score": 710,
+      "carried": 6,
+      "flames": 2,
+      "lit": 2
     },
     {
-      "t": 2943,
+      "t": 4211,
       "state": "playing",
-      "score": 620,
-      "carried": 0,
-      "flames": 1,
-      "lit": 3
-    },
-    {
-      "t": 3211,
-      "state": "playing",
-      "score": 640,
-      "carried": 2,
-      "flames": 1,
-      "lit": 3
-    },
-    {
-      "t": 3479,
-      "state": "playing",
-      "score": 670,
+      "score": 850,
       "carried": 5,
-      "flames": 1,
+      "flames": 2,
       "lit": 3
     },
     {
-      "t": 3799,
+      "t": 4523,
       "state": "playing",
-      "score": 790,
+      "score": 970,
       "carried": 2,
-      "flames": 1,
+      "flames": 2,
       "lit": 4
     },
     {
-      "t": 4059,
+      "t": 4767,
       "state": "playing",
-      "score": 820,
+      "score": 990,
+      "carried": 4,
+      "flames": 2,
+      "lit": 4
+    },
+    {
+      "t": 5011,
+      "state": "playing",
+      "score": 1000,
       "carried": 5,
-      "flames": 1,
+      "flames": 2,
+      "lit": 4
+    },
+    {
+      "t": 5279,
+      "state": "playing",
+      "score": 1010,
+      "carried": 6,
+      "flames": 2,
       "lit": 4
     }
   ]

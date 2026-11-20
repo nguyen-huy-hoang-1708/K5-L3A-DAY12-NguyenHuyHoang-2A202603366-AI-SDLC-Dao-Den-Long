@@ -75,9 +75,14 @@ CI: [.github/workflows/ci.yml](.github/workflows/ci.yml) chạy test + mutation 
 
 Mọi phần sau chỉ nằm ở client (`web/main.js`), **không** đụng `src/sim.js`, nên đầu ra headless không đổi (bằng chứng: `npm test` + hash tất định trong [docs/proof/phase-1/headless/README.md](docs/proof/phase-1/headless/README.md) không phụ thuộc thư mục `web/`).
 
-1. **Âm thanh tự tổng hợp bằng WebAudio** (không dùng file asset): tiếng "ting" khi nhặt đom đóm, hợp âm đi lên khi thắp đèn, âm trầm khi bị chạm, giai điệu thắng/thua.
-2. **Đảo sáng dần**: mỗi đèn thắp làm bầu trời/sương chuyển từ tím đen sang tím hồng ấm và sương lùi xa hơn; đèn của Mây sáng mạnh hơn khi mang nhiều đom đóm.
-3. **Vòng tiến độ dưới chân đèn** cho biết đã nạp bao nhiêu/5, và **vòng an toàn** phát sáng quanh đèn đã thắp (đúng `safe_radius`).
+1. **Phong cách tiên hiệp / kiếm hiệp**: đảo nổi giữa biển mây, núi đá dựng đứng trong sương, đảo nhỏ trôi lơ lửng, trăng và sao, bảo tháp, thông, hoa đào rơi, lan can đá đỏ ở mép đảo (chính là giới hạn di chuyển `island_radius`). Hậu kỳ **bloom** làm đèn, đom đóm và hiệu ứng phát sáng.
+2. **Đèn Lồng Lớn kiểu cổng gỗ sơn son, đèn giấy đỏ**: khi thắp có **cột sáng lên trời**, tia lửa bung ra; **trận pháp** xoay dưới chân đèn vẽ đúng `safe_radius`; 5 hạt sáng quanh chân đèn cho biết đã nạp bao nhiêu/5.
+3. **Quang Chưởng** (tỏa sáng): trận pháp vàng lan đúng `pulse_radius`, sóng xung kích, rung camera. Bóng Mực là khối mực tím đen có vệt khói, khi choáng hiện ấn phù vàng trên đầu.
+4. **Mây** mặc áo trắng viền xanh, thắt lưng đỏ, nón lá treo đèn lồng nhỏ, hai dải lụa bay theo gió, vòng khí dưới chân sáng dần theo số đom đóm đang mang.
+5. **Đảo sáng dần**: mỗi đèn thắp làm bầu trời chuyển từ tím đen sang ấm, sương lùi xa; thắng thì có pháo hoa.
+6. **Âm thanh tự tổng hợp bằng WebAudio** theo **ngũ cung** (không dùng file asset). HUD kiểu bảng sơn mài viền vàng, màn hình tiêu đề có ấn triện.
+
+Ghi chú: rubric không cộng điểm cho đồ họa vượt yêu cầu — phần này làm theo yêu cầu của chủ dự án và chỉ nằm ở client.
 
 Ảnh: [docs/proof/phase-1/playtest/](docs/proof/phase-1/playtest/).
 

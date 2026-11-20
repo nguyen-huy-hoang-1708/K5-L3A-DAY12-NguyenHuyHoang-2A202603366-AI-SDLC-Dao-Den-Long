@@ -3,22 +3,22 @@
   "seed": 7,
   "speed": 4,
   "final": {
-    "tick": 772,
+    "tick": 869,
     "state": "lost",
-    "score": 10,
+    "score": 0,
     "flames": 0,
     "lit": 0,
     "hud": [
-      "Lửa 0",
-      "Đom đóm 1/10",
-      "Đèn 0/5",
-      "Còn 4:48",
-      "Điểm 10",
-      "Tỏa sáng cần 2 đom đóm"
+      "Hồn Hỏa0",
+      "Đom đóm0/10",
+      "FQuang Chưởngcần 2 đom đóm",
+      "Đèn Lồng0/5",
+      "Canh Giờ4:46",
+      "Điểm0"
     ]
   },
   "after_replay": {
-    "tick": 163,
+    "tick": 160,
     "state": "playing",
     "score": 0,
     "lit": 0,
@@ -27,11 +27,19 @@
   "console_errors": [],
   "samples": [
     {
-      "t": 291,
+      "t": 387,
       "state": "playing",
       "score": 0,
       "carried": 0,
       "flames": 3,
+      "lit": 0
+    },
+    {
+      "t": 815,
+      "state": "playing",
+      "score": 0,
+      "carried": 0,
+      "flames": 1,
       "lit": 0
     }
   ]
