@@ -17,13 +17,13 @@
     }
     html, body { margin: 0; height: 100%; overflow: hidden; background: var(--sky); font-family: var(--serif); color: var(--text); }
     canvas { display: block; }
-    .pill { position: fixed; display: flex; align-items: center; gap: 8px; padding: 7px 14px; font-size: 14px; pointer-events: none;
+    .pill { position: fixed; display: flex; align-items: center; gap: 8px; padding: 7px 14px; font-size: 18px; pointer-events: none;
       background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid var(--gold-dim); border-radius: 4px;
       box-shadow: 0 0 0 1px rgba(0,0,0,.55), inset 0 0 12px rgba(242,193,78,.08); font-variant-numeric: tabular-nums; }
     .pill::before, .pill::after { content: ""; position: absolute; width: 8px; height: 8px; border: 2px solid var(--gold); }
     .pill::before { top: -3px; left: -3px; border-right: 0; border-bottom: 0; }
     .pill::after { bottom: -3px; right: -3px; border-left: 0; border-top: 0; }
-    .lbl { color: var(--gold); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+    .lbl { color: var(--gold); font-size: 18px; letter-spacing: .08em; text-transform: uppercase; }
     .num { font-weight: 600; }
     .big { font-size: 22px; }
     #h-flames { top: 14px; left: 14px; }
@@ -38,12 +38,12 @@
     #h-motes { bottom: 16px; left: 50%; transform: translateX(-50%); }
     .cell { width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--gold-dim); background: rgba(0,0,0,.35); }
     .cell.on { background: radial-gradient(circle at 45% 40%, #FFF6C2, #FFE58A 55%, rgba(255,229,138,.2)); box-shadow: 0 0 10px #FFE58A; border-color: #FFE58A; }
-    #h-skills { bottom: 16px; right: 14px; gap: 12px; }
+    #h-skills { bottom: 30px; right: 14px; gap: 22px; padding-bottom: 26px; }
     .skill { position: relative; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; border: 2px solid var(--gold); font-weight: 700; color: var(--text);
       background: radial-gradient(circle, rgba(242,193,78,.25), rgba(14,20,48,.9)); }
     .skill .cd { position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(rgba(5,8,20,.82) var(--p, 0%), transparent 0); }
-    .skill .key { position: relative; font-size: 15px; }
-    .skill .name { position: absolute; bottom: -16px; font-size: 10px; color: var(--gold); white-space: nowrap; }
+    .skill .key { position: relative; font-size: 18px; }
+    .skill .name { position: absolute; bottom: -26px; font-size: 18px; color: var(--gold); white-space: nowrap; }
     .skill.off { opacity: .55; border-color: var(--gold-dim); }
     .flame { width: 18px; height: 22px; border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%; background: rgba(255,255,255,.08); border: 1px solid var(--gold-dim); }
     .flame.on { background: radial-gradient(circle at 50% 65%, #FFE9B0, #FFB347 50%, #e0521f 85%); border-color: #FFB347; box-shadow: 0 0 10px #FFB347; animation: flick 1.3s ease-in-out infinite; }
@@ -69,10 +69,10 @@
       box-shadow: 0 0 60px rgba(255, 179, 71, .22); }
     .card h1 { margin: 6px 0 2px; font-family: var(--title); font-size: 50px; line-height: 1.05;
       background: linear-gradient(180deg, #FFE9B0 10%, #F2C14E 55%, #c9822a 90%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .sub { color: var(--gold); letter-spacing: .22em; text-transform: uppercase; font-size: 13px; }
+    .sub { color: var(--gold); letter-spacing: .22em; text-transform: uppercase; font-size: 18px; }
     .divider { height: 14px; margin: 12px auto 8px; width: 70%; background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent) center / 100% 1px no-repeat,
       radial-gradient(circle, var(--gold) 3px, transparent 4px) center / 14px 14px no-repeat; }
-    .card p { line-height: 1.65; margin: 8px 0; font-size: 15px; }
+    .card p { line-height: 1.65; margin: 8px 0; font-size: 18px; }
     .card .quote { font-style: italic; border-left: 2px solid var(--gold); padding-left: 12px; text-align: left; }
     .card .big b { color: var(--gold); }
     .seal { position: absolute; top: -26px; left: 50%; transform: translateX(-50%) rotate(-4deg); width: 52px; height: 52px; display: grid; place-items: center;
@@ -82,11 +82,28 @@
       background: linear-gradient(180deg, #FFE9B0, #F2C14E 60%, #c97a20); border: 1px solid #FFE9B0; border-radius: 3px; }
     .btn.ghost { background: transparent; color: var(--text); border-color: var(--gold-dim); }
     .btn:focus-visible, .btn:hover { outline: 2px solid var(--text); }
-    .keys { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; margin: 12px 0 4px; font-size: 13px; }
-    kbd { display: inline-block; padding: 1px 7px; border: 1px solid var(--gold-dim); border-bottom-width: 2px; border-radius: 4px; background: #1B2350; color: var(--gold); font-family: inherit; font-size: 12px; }
+    .keys { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; margin: 12px 0 4px; font-size: 18px; }
+    kbd { display: inline-block; padding: 1px 7px; border: 1px solid var(--gold-dim); border-bottom-width: 2px; border-radius: 4px; background: #1B2350; color: var(--gold); font-family: inherit; font-size: 18px; }
     .row { display: grid; grid-template-columns: 1fr 2fr 48px; gap: 10px; align-items: center; margin: 12px 0; text-align: left; }
     .row input { width: 100%; accent-color: #F2C14E; }
     table.nights { margin: 10px auto; border-collapse: collapse; } table.nights td { padding: 3px 12px; border-bottom: 1px solid rgba(242,193,78,.2); }
+    /* Accessibility (Ticket-04 §4): larger text ×1.25, captions, shade direction arrow, reduced motion. */
+    html.big .pill, html.big #prompt, html.big #banner, html.big .card, html.big #captions { zoom: 1.25; }
+    #captions { position: fixed; left: 14px; bottom: 120px; display: flex; flex-direction: column; gap: 6px; max-width: 46vw; pointer-events: none; font-size: 18px; }
+    #captions div { background: rgba(5, 8, 20, .82); border-left: 4px solid var(--gold); padding: 6px 12px; border-radius: 3px; }
+    #captions div.danger { border-left-color: var(--danger); }
+    #shade-arrow { position: fixed; width: 0; height: 0; border-left: 14px solid transparent; border-right: 14px solid transparent; border-bottom: 26px solid #7A3CFF; display: none; pointer-events: none; transform-origin: 50% 60%; filter: drop-shadow(0 0 6px #7A3CFF); }
+    body.cb #shade-arrow { border-bottom-color: #00B3FF; filter: drop-shadow(0 0 6px #00B3FF); }
+    body.rm #vignette.hit, body.rm .flash { animation: none !important; }
+    body.rm #h-clock.danger .num { animation: none; }
+    .keyrow { display: grid; grid-template-columns: 1fr 160px; gap: 8px; align-items: center; margin: 4px 0; text-align: left; }
+    .keyrow button { font: inherit; font-size: 18px; padding: 4px 10px; background: #1B2350; color: var(--text); border: 1px solid var(--gold-dim); border-radius: 3px; cursor: pointer; }
+    .keyrow button.dup { border-color: var(--danger); color: var(--danger); }
+    .keyrow button.wait { border-color: var(--gold); color: var(--gold); }
+    .msg { min-height: 24px; color: var(--danger); }
+    table.lb { margin: 10px auto; border-collapse: collapse; width: 100%; } table.lb td, table.lb th { padding: 4px 8px; border-bottom: 1px solid rgba(242,193,78,.2); text-align: left; }
+    input.name { font: inherit; font-size: 20px; padding: 6px 10px; width: 220px; background: #0E1430; color: var(--text); border: 1px solid var(--gold); border-radius: 3px; }
+    .scroll { max-height: 60vh; overflow: auto; }
     @media (max-width: 640px) { .card h1 { font-size: 36px; } .card { padding: 30px 18px 22px; } #banner { font-size: 22px; } .cell { width: 13px; height: 13px; } }
   </style>
   <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
@@ -103,6 +120,8 @@
     <div id="arrow"></div>
   </div>
   <div id="banner"></div>
+  <div id="captions" aria-live="polite"></div>
+  <div id="shade-arrow"></div>
   <div id="overlay"><div class="card" id="card"></div></div>
   <script type="module" src="./main.js"></script>
 </body>

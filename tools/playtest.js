@@ -27,7 +27,8 @@ fs.mkdirSync(OUT, { recursive: true });
 
 const CHROME = [process.env.CHROME, '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', '/usr/bin/google-chrome', '/usr/bin/chromium', '/usr/bin/chromium-browser'].find((p) => p && fs.existsSync(p));
 if (!CHROME) { console.error('Chrome/Chromium not found (set CHROME=path)'); process.exit(1); }
-const server = spawn(process.execPath, [path.join(ROOT, 'tools/serve.js'), '--no-open', '--port', String(PORT)], { stdio: 'ignore' });
+const LB = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'ddl-lb-')), 'leaderboard.json');
+const server = spawn(process.execPath, [path.join(ROOT, 'tools/serve.js'), '--no-open', '--port', String(PORT)], { stdio: 'ignore', env: { ...process.env, DDL_DATA: LB } });
 const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'ddl-chrome-'));
 const gl = GPU ? ['--use-angle=metal', '--enable-gpu'] : ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'];
 const chrome = spawn(CHROME, ['--headless=new', '--remote-debugging-port=0', `--user-data-dir=${profile}`, '--window-size=1280,720', ...gl, '--mute-audio', '--autoplay-policy=no-user-gesture-required', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
@@ -62,7 +63,7 @@ const shot = async (name) => {
   fs.writeFileSync(path.join(OUT, `${name}.png`), Buffer.from(data, 'base64'));
   console.log(`  saved ${name}.png`);
 };
-const KEY = { KeyW: 'w', KeyA: 'a', KeyS: 's', KeyD: 'd', KeyE: 'e', KeyF: 'f', KeyQ: 'q', KeyR: 'r', KeyP: 'p', Space: ' ', Enter: 'Enter', Escape: 'Escape' };
+const KEY = { KeyW: 'w', KeyA: 'a', KeyS: 's', KeyD: 'd', KeyE: 'e', KeyF: 'f', KeyJ: 'j', KeyQ: 'q', KeyR: 'r', KeyP: 'p', Space: ' ', Enter: 'Enter', Escape: 'Escape', ShiftLeft: 'Shift' };
 const held = new Set();
 const key = (code, down) => cdp('Input.dispatchKeyEvent', { type: down ? 'keyDown' : 'keyUp', code, key: KEY[code] });
 async function hold(codes) {
@@ -137,7 +138,7 @@ async function playNight(n) {
       else if (threat) {
         // No pulse available: dash and run into the safe zone of the nearest lit lantern.
         const safe = s.lanterns.filter((l) => l.lit && reachable(s, l.pos)).sort((a, b) => d(a.pos) - d(b.pos))[0];
-        if (safe && d(safe.pos) > 3) { target = safe.pos; interact = false; await tap('KeyQ'); }
+        if (safe && d(safe.pos) > 3) { target = safe.pos; interact = false; await tap('ShiftLeft'); }
       }
     }
     const codes = [];
@@ -168,11 +169,35 @@ async function playNight(n) {
       await sleep(200);
       await js(`(() => { const v = document.getElementById('s-vol'); v.value = 0.35; v.dispatchEvent(new Event('input')); const s = document.getElementById('s-sens'); s.value = 1.7; s.dispatchEvent(new Event('input')); const c = document.getElementById('s-cb'); if (c) { c.checked = true; c.dispatchEvent(new Event('change')); } })()`);
       await shot('05-settings');
+      // Key remapping: rebind jump to J, create a duplicate (pulse = E), check the warning, restore defaults.
+      await js(`document.getElementById('b-keys').click()`);
+      await sleep(150);
+      await js(`document.querySelector('#keylist button[data-a="jump"]').click()`);
+      await tap('KeyJ');
+      await sleep(100);
+      const rebound = await js('window.__ui.settings.keys.jump');
+      await js(`document.querySelector('#keylist button[data-a="pulse"]').click()`);
+      await tap('KeyE');
+      await sleep(100);
+      const dupMsg = await js(`document.getElementById('keymsg').textContent`);
+      await shot('05b-keys-duplicate');
+      await js(`document.getElementById('b-kreset').click()`);
+      await sleep(100);
+      const restored = await js(`JSON.stringify(window.__ui.settings.keys)`);
+      report.checks.remap = rebound === 'KeyJ';
+      report.checks.remap_duplicate_warning = /trùng/.test(dupMsg);
+      report.checks.remap_reset = restored.includes('"jump":"Space"') && restored.includes('"pulse":"KeyF"');
+      await js(`document.getElementById('b-kdone').click()`);
+      await sleep(150);
       await js(`document.getElementById('b-back').click()`);
       await sleep(200);
       await js(`document.getElementById('b-res').click()`);
       await sleep(300);
       report.checks.resumed = (await ui()) === 'play';
+    }
+    if (s.tick > 320 && report.checks.captions === undefined) {
+      report.checks.captions = await js(`[...document.querySelectorAll('#captions div')].some((d) => /Bóng Mực/.test(d.textContent))`);
+      if (report.checks.captions) await shot(`03b-night${n}-caption-shade`);
     }
     await sleep(35);
   }
@@ -210,10 +235,27 @@ if (MODE === 'campaign') {
   await playNight(START);
   await sleep(300);
   report.checks.result = (await ui()) === 'result';
+  // Leaderboard: invalid name rejected, Vietnamese name saved to disk, leaderboard screen, export in order.
+  await js(`(() => { const i = document.getElementById('lb-name'); i.value = 'ab'; document.getElementById('b-save').click(); })()`);
+  await sleep(200);
+  report.checks.lb_invalid_rejected = /⚠/.test(await js(`document.getElementById('lb-msg').textContent`));
+  await js(`(() => { const i = document.getElementById('lb-name'); i.value = 'Mây_Bot'; document.getElementById('b-save').click(); })()`);
+  await sleep(600);
+  report.checks.lb_screen = (await ui()) === 'leaderboard';
+  await shot('08a-leaderboard');
+  const { spawnSync } = await import('node:child_process');
+  const exp = path.join(OUT, 'leaderboard-export.json');
+  spawnSync(process.execPath, [path.join(ROOT, 'tools/serve.js'), '--export-leaderboard', exp], { env: { ...process.env, DDL_DATA: LB } });
+  const ex = JSON.parse(fs.readFileSync(exp, 'utf8'));
+  report.checks.lb_export = ex.entries.length === 1 && ex.entries[0].name === 'Mây_Bot' && /[+-]\d\d:\d\d$/.test(ex.entries[0].achieved_at);
+  await js(`document.getElementById('b-lbback').click()`);
+  await sleep(300);
+  await tap('Enter'); // menu -> start a new run (night 1)
+  await sleep(500);
   await tap('KeyR');
   await sleep(600);
   const s = await state();
-  report.checks.retry_same_night = (await ui()) === 'intro' && s.night === START && s.tick === 0;
+  report.checks.new_run_from_menu = (await ui()) === 'intro' && s.tick === 0;
   await shot('08-retry');
 }
 const all = report.nights.flatMap((x) => x.fps_samples || []);
