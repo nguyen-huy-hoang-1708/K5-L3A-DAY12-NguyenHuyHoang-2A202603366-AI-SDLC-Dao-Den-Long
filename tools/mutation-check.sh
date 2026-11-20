@@ -53,4 +53,6 @@ mut 's/shadeSpeed: 4.5,/shadeSpeed: 4.0,/' "M23 night 3 shades too slow" src/map
 mut 's/vy: 12, h: 8, dir/vy: 10, h: 8, dir/' "M25 night 3 pad too weak" src/maps.js
 mut 's/shadeEvery: 420,/shadeEvery: 480,/' "M26 night 2 shade interval wrong" src/maps.js
 mut 's/STEP: 0.35,/STEP: 5,/' "M24 tier walls climbable"
+mut 's/  if (g.bench) return g.events;/  \/\/ bench end disabled/' "M40 bench scene can end the night"
+mut 's/    if (!l.lit || g.bench) continue;/    if (!l.lit) continue;/' "M41 bench lanterns lose fuel"
 [ $ok = 1 ] && echo "ALL MUTATIONS CAUGHT" || { echo "SOME MUTATIONS SURVIVED"; exit 1; }

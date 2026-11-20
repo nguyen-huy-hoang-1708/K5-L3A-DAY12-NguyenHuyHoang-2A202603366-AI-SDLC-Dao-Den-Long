@@ -9,7 +9,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const phase = process.argv[2] || 'phase-3';
+const phase = process.argv[2] || 'phase-4';
 const OUT = path.join(ROOT, 'docs/proof', phase, 'headless');
 fs.mkdirSync(OUT, { recursive: true });
 const node = process.execPath;

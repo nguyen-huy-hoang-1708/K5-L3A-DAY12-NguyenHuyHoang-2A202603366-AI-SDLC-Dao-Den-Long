@@ -1,0 +1,2 @@
+# headless output of fixtures + full nights: HEAD vs tag phase-3 (Ticket-04 must not change the rules)
+identical=38 different=0
