@@ -24,5 +24,8 @@ export const PALETTE = Object.freeze({
   uiText: '#F5F1E6',
 });
 
+/** Colour-blind friendly overrides (Ticket-03 §6). */
+export const PALETTE_CB = Object.freeze({ shadeRim: '#00B3FF', uiDanger: '#FFFFFF' });
+
 /** Environment light intensity from progress (Ticket-02): 0.15 + 0.55 × lit/total. */
 export const ambientIntensity = (lit, total) => 0.15 + 0.55 * (total ? lit / total : 0);

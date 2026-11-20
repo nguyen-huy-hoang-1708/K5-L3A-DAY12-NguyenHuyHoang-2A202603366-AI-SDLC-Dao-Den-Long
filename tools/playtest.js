@@ -19,7 +19,8 @@ const SEED = Number(arg('--seed', 7));
 const SPEED = Number(arg('--speed', 4));
 const LIT = Number(arg('--lit', MODE === 'campaign' ? 4 : 0));
 const GPU = process.argv.includes('--gpu');
-const START = Number(arg('--night', 1)); // campaign start night (uses the ?night= debug parameter)
+const START = Number(arg('--night', 1));
+const EXTRA = arg('--extra', ''); // extra debug URL parameters, e.g. '&fuel=25' // campaign start night (uses the ?night= debug parameter)
 const PORT = 8000 + Math.floor(Math.random() * 900);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 fs.mkdirSync(OUT, { recursive: true });
@@ -72,13 +73,13 @@ const tap = async (code) => { await key(code, true); await sleep(50); await key(
 const ui = () => js('window.__ui ? window.__ui.screen : null');
 const state = () => js(`(() => { const g = window.__game; if (!g) return null; return { night: g.night, tick: g.tick, state: g.state, score: g.score, p: g.player.pos, dead: g.player.dead,
   carried: g.player.carried, flames: g.player.flames, pulseCd: g.player.pulseCdT, motes: g.motes.map(m => m.pos),
-  lanterns: g.lanterns.map(l => ({ id: l.id, pos: l.pos, lit: l.lit, dep: l.deposited })), shades: g.shades.map(s => ({ pos: s.pos, state: s.state })),
+  lanterns: g.lanterns.map(l => ({ id: l.id, pos: l.pos, lit: l.lit, dep: l.deposited, fuel: l.fuelU / 60, ever: l.everLit })), cap: Math.min(20, 10 + 2 * g.player.successful), shades: g.shades.map(s => ({ pos: s.pos, state: s.state })),
   hud: [...document.querySelectorAll('#hud .pill')].map(e => e.textContent.replace(/\\s+/g, ' ').trim()) }; })()`);
 
 await cdp('Page.enable');
 await cdp('Runtime.enable');
 await cdp('Emulation.setDeviceMetricsOverride', { width: 1280, height: 720, deviceScaleFactor: 1, mobile: false });
-await cdp('Page.navigate', { url: `http://localhost:${PORT}/web/?seed=${SEED}&speed=${SPEED}${LIT ? `&lit=${LIT}` : ''}${START > 1 ? `&night=${START}` : ''}` });
+await cdp('Page.navigate', { url: `http://localhost:${PORT}/web/?seed=${SEED}&speed=${SPEED}${LIT ? `&lit=${LIT}` : ''}${START > 1 ? `&night=${START}` : ''}${EXTRA}` });
 await sleep(2500);
 const report = { mode: MODE, seed: SEED, speed: SPEED, lit: LIT, gpu: GPU, nights: [], checks: {}, errors };
 await shot('01-menu');
@@ -117,14 +118,19 @@ async function playNight(n) {
     const unlit = s.lanterns.filter((l) => !l.lit && reachable(s, l.pos)).sort((a, b) => d(a.pos) - d(b.pos));
     let target = null, interact = false;
     if (MODE === 'lose') target = s.shades.length ? s.shades[0].pos : [0, 0, 8];
-    else if (unlit.length) {
-      const need = 10 - unlit[0].dep;
-      if (s.carried >= Math.min(need, 10) || (s.carried > 0 && s.motes.filter((m) => reachable(s, m)).length === 0)) {
-        target = unlit[0].pos;
+    else {
+      // Ticket-03 goal: keep >= ceil(0.6 n) lanterns lit until dawn. Refuel weak lanterns first, then light more.
+      const needLit = Math.ceil((s.lanterns.length * 6) / 10);
+      const litN = s.lanterns.filter((l) => l.lit).length;
+      const weak = s.lanterns.filter((l) => l.lit && l.fuel < 55 && reachable(s, l.pos)).sort((a, b) => a.fuel - b.fuel);
+      const cost = (l) => (l.ever ? 5 : 10) - l.dep;
+      const goal = weak.length && s.carried >= 3 ? weak[0] : litN <= needLit && unlit.length && s.carried >= Math.min(cost(unlit[0]), s.cap) ? unlit[0] : null;
+      if (goal || (s.carried > 0 && s.motes.filter((m) => reachable(s, m)).length === 0 && unlit.length)) {
+        target = (goal || unlit[0]).pos;
         interact = d(target) <= 1.6;
       } else {
         const motes = s.motes.filter((m) => reachable(s, m)).sort((a, b) => d(waypoint(s, a)) - d(waypoint(s, b)));
-        target = motes[0] || unlit[0].pos;
+        target = motes[0] || (unlit[0] && unlit[0].pos) || null;
       }
       const threat = s.shades.find((x) => (x.state === 'chase' || x.state === 'wander') && d(x.pos) < 3.5);
       if (threat && s.carried >= 3 && s.pulseCd === 0 && Date.now() - lastPulse > 500) { await tap('KeyF'); lastPulse = Date.now(); }
@@ -146,6 +152,8 @@ async function playNight(n) {
     await hold(codes);
     if (interact) { await tap('KeyE'); await sleep(80); }
     if (!shotDone && s.tick > 900) { shotDone = true; await shot(`03-night${n}-play`); }
+    if (EXTRA && !report.checks.drainShot && s.shades.some((x) => x.state === 'drain')) { report.checks.drainShot = true; await shot(`09-night${n}-drain`); }
+    if (EXTRA && !report.checks.outShot && s.lanterns.some((l) => !l.lit && l.ever)) { report.checks.outShot = true; await shot(`10-night${n}-lantern-out`); }
     if (n === 1 && MODE === 'campaign' && !report.checks.pause) {
       // Pause check: logic must stop; settings persist.
       await hold([]);
@@ -158,7 +166,7 @@ async function playNight(n) {
       await shot('04-pause-menu');
       await js(`document.getElementById('b-set').click()`);
       await sleep(200);
-      await js(`(() => { const v = document.getElementById('s-vol'); v.value = 0.35; v.dispatchEvent(new Event('input')); const s = document.getElementById('s-sens'); s.value = 1.7; s.dispatchEvent(new Event('input')); })()`);
+      await js(`(() => { const v = document.getElementById('s-vol'); v.value = 0.35; v.dispatchEvent(new Event('input')); const s = document.getElementById('s-sens'); s.value = 1.7; s.dispatchEvent(new Event('input')); const c = document.getElementById('s-cb'); if (c) { c.checked = true; c.dispatchEvent(new Event('change')); } })()`);
       await shot('05-settings');
       await js(`document.getElementById('b-back').click()`);
       await sleep(200);
@@ -197,7 +205,7 @@ if (MODE === 'campaign') {
   // Settings persisted across a reload.
   await cdp('Page.reload');
   await sleep(2500);
-  report.checks.settings_persisted = await js('window.__ui.settings.volume === 0.35 && window.__ui.settings.sens === 1.7');
+  report.checks.settings_persisted = await js('window.__ui.settings.volume === 0.35 && window.__ui.settings.sens === 1.7 && window.__ui.settings.colorblind !== false');
 } else {
   await playNight(START);
   await sleep(300);
