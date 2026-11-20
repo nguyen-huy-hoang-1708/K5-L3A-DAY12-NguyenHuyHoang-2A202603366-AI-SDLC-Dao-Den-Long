@@ -1,0 +1,40 @@
+caught (4 failing)  M1 safe zone disabled
+caught (2 failing)  M2 deposit not capped
+caught (1 failing)  M3 no invulnerability
+caught (3 failing)  M4 pulse free + no cooldown
+caught (4 failing)  M5 no deposit score
+caught (1 failing)  M6 wrong yaw sign
+caught (2 failing)  M7 stun 1 s instead of 2 s
+caught (1 failing)  M8 drop rounds up
+caught (4 failing)  M9 dawn never ends the night
+caught (3 failing)  M27 dawn win ignores the 60% rule
+caught (7 failing)  M28 fuel decays twice as fast
+caught (1 failing)  M29 drain too weak
+caught (2 failing)  M30 low-fuel threshold wrong
+caught (1 failing)  M31 relight costs 10
+caught (3 failing)  M32 capacity never grows
+caught (2 failing)  M33 refuel rounds down
+caught (1 failing)  M34 relight scores like first light
+caught (1 failing)  M35 drain never turns to chase
+caught (1 failing)  M36 no drain pulse bonus
+caught (2 failing)  M37 weak lantern keeps its safe zone
+caught (1 failing)  M38 refuel does not evict
+caught (1 failing)  M39 no dawn lantern bonus
+caught (7 failing)  M10 speed drifts from contract
+caught (1 failing)  M11 dash has no cooldown
+caught (1 failing)  M12 dash too short
+caught (1 failing)  M13 drifter steals everything
+caught (1 failing)  M14 drifter chase threshold wrong
+caught (2 failing)  M15 charm has no speed boost
+caught (1 failing)  M16 pause does not freeze sim
+caught (2 failing)  M17 never fall off
+caught (1 failing)  M18 no respawn wait
+caught (2 failing)  M19 wrong shade schedule
+caught (2 failing)  M20 only one shade at tick 300
+caught (2 failing)  M21 no eviction from new safe zone
+caught (1 failing)  M22 wind too strong
+caught (1 failing)  M23 night 3 shades too slow
+caught (1 failing)  M25 night 3 pad too weak
+caught (1 failing)  M26 night 2 shade interval wrong
+caught (1 failing)  M24 tier walls climbable
+ALL MUTATIONS CAUGHT

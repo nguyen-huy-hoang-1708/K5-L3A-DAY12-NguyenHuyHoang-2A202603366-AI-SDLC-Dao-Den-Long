@@ -9,3 +9,8 @@ _Sẽ viết đầy đủ ở cuối Phase 4 (số liệu cả dự án, bài h�
 ## Ghi nhanh sau Phase 2
 - Hiệu quả: bảng "thay đổi so với Phase 1" trước khi code giúp sửa test cũ có lý do, không tắt test nào; viết lại sim một lần theo đúng 11 bước ticket; mutation check tiếp tục tìm ra test yếu (bất tử, thời gian chờ hồi sinh, lịch Đêm 2).
 - Chưa hiệu quả: bot playtest quá đơn giản cho Đêm 2/3 → chưa chứng minh được Bình Minh bằng bot; FPS phụ thuộc GPU nên phải đo bằng Chrome dùng Metal.
+
+## Ghi nhanh sau Phase 3
+- Hiệu quả: ADR và bảng "test cũ bị ảnh hưởng" viết trước khi code, nên việc sửa test có lý do rõ ràng. Tính tay kỳ vọng tìm ra một lỗi thật (dung sai vào/ra `drain`). Lưu dầu bằng đơn vị nguyên giúp các ngưỡng chính xác.
+- Chưa hiệu quả: bot playtest vẫn chưa thắng được Đêm, nên chưa chứng minh được thắng ở bình minh bằng client. Phần này đã được kiểm chứng bằng scenario headless.
+

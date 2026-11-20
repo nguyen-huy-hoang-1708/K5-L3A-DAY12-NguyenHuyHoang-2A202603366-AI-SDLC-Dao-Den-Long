@@ -1,0 +1,65 @@
+{
+  "mode": "campaign",
+  "seed": 7,
+  "speed": 4,
+  "lit": 5,
+  "gpu": true,
+  "nights": [
+    {
+      "night": 1,
+      "state": "lost",
+      "score": 65,
+      "flames": 0,
+      "tick": 4632,
+      "hud": [
+        "Ngọn lửa0",
+        "Đêm 12:43",
+        "Đèn 5/5 cần 365",
+        "Đom đóm1/10",
+        "⇧Lướt FTỏa sáng"
+      ],
+      "fps_samples": [
+        55.7,
+        60,
+        54.5,
+        60,
+        60,
+        60,
+        60,
+        60,
+        60,
+        60,
+        60,
+        60,
+        60,
+        60,
+        60,
+        60,
+        60,
+        60,
+        59,
+        60,
+        60,
+        60,
+        60,
+        60
+      ]
+    }
+  ],
+  "checks": {
+    "menu": true,
+    "intro": true,
+    "pause": true,
+    "resumed": true,
+    "dawn": false,
+    "settings_persisted": true
+  },
+  "errors": [],
+  "total": 0,
+  "fps": {
+    "gl": "gpu (metal)",
+    "mean": 59.6,
+    "min": 54.5,
+    "samples": 24
+  }
+}

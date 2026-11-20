@@ -51,7 +51,27 @@ Công cụ: **Claude Code** (desktop app, model Claude Opus 5.5). Harness: [AGEN
 | 11 | Bot playtest trốn trong vùng an toàn chờ Bóng bỏ đi → kẹt cả đêm (Bóng ở mép 6 m vẫn < 18 m nên không bỏ đuổi) | Ảnh cuối playtest | Bỏ luật chờ của bot; ghi nhận bot chưa thắng được Đêm 2/3 (chưa đạt một phần) |
 | 12 | Ảnh `07-dawn.png` được chụp dù chưa tới Bình Minh (ảnh sai nội dung) | Xem lại danh sách ảnh | Chỉ chụp khi `screen === 'dawn'`; chuyển ảnh sai ra khỏi bằng chứng |
 
+## Phase 3
+
+### Lời nhắc chính
+- Dán nguyên văn Ticket-03 (change request) vào phiên.
+
+### Trình tự
+1. Viết ADR 0001 và `phase-3.md` trước: bảng **test cũ bị luật mới làm sai** và cách xử lý, 11 giả định, 13 tiêu chí.
+2. Sửa sim. Dầu lưu bằng đơn vị nguyên 1/60 theo khuyến nghị của ticket.
+3. Viết lại test cũ (không skip test nào) và thêm 9 scenario. Chạy mutation check ngầm trong lúc làm client.
+4. Làm client và chế độ mù màu, chạy playtest, sinh bằng chứng.
+
+### AI sai ở đâu & cách phát hiện
+| # | Sai | Phát hiện bằng | Sửa / chỉnh harness |
+|---|---|---|---|
+| 13 | **Lỗi thật**: điều kiện vào `drain` có dung sai 1e-9, điều kiện ra thì không. Ở 2.0000000001 m, Bóng lật qua lại `drain`/`wander`, nên event `fuel_drain` chậm 2 tick | Scenario `drain` kỳ vọng tick 105 (tính tay), thực tế 107 → trace từng tick | Dùng cùng dung sai cho cả hai chiều; thêm quy tắc vào AGENTS |
+| 14 | Kỳ vọng dầu sau 10 tick là 99.8; đúng ra đèn thắp ở tick 1, chỉ hao 9 tick nên 99.85 làm tròn thành 99.9 | Test đỏ → đếm lại tick | Kỳ vọng sai, code đúng; sửa kỳ vọng kèm chú thích cách tính |
+| 15 | Client vẫn vẽ vòng an toàn cho đèn yếu, dù đèn đó đã mất vùng an toàn (sai luật về mặt hình ảnh) | Xem ảnh playtest `10-night1-lantern-out` | Ẩn vòng khi fuel < 30 rồi chụp lại |
+| 16 | Đèn trên nón của Mây quá sáng khi mang nhiều đom đóm (bloom làm chói nhân vật) | Ảnh `03-night1-play` | Giảm cường độ |
+
 ### Token / chi phí (ước tính)
 - Không có số đo chính xác trong phiên; ước tính theo độ dài phiên: khoảng **60–80k token output** và **~2–3M token input** (phần lớn là ngữ cảnh được cache đọc lại mỗi lượt). Cập nhật số thật từ trang usage của Claude nếu cần.
 - Cách tiết kiệm: đọc tài liệu lab một lần và tóm tắt vào notes; một module luật dùng chung (không viết luật hai lần); không thêm dependency (không `npm install`, không đọc tài liệu thư viện); dùng script sinh bằng chứng thay vì chụp/đọc ảnh nhiều lần; chỉ đọc 4 ảnh để kiểm tra trực quan.
 - Phase 2 (ước tính theo độ dài phiên): khoảng **120–160k token output**, **~6–9M token input** (chủ yếu ngữ cảnh được cache). Tiết kiệm: viết spec + bảng thay đổi trước để agent không đoán; một lần viết lại sim thay vì vá nhiều lần; test chạy qua CLI thật; bot playtest chạy ngầm chỉ đọc ảnh cần thiết (≈ 8 ảnh); không đọc lại file lớn khi không cần.
+- Phase 3 (ước tính): khoảng **60–80k token output**, **~4–6M token input**. Cách tiết kiệm: sửa sim bằng một script thay thế có kiểm tra số lần khớp, không viết lại cả file. Chạy mutation check ngầm song song với việc sửa client. Chỉ đọc 4 ảnh.

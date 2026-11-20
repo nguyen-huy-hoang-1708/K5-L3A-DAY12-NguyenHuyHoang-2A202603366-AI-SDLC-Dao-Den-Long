@@ -1,6 +1,6 @@
 # AGENTS.md — Đảo Đèn Lồng
 
-Game 3D web (Three.js) + headless Node theo **Test Contract v1.1** (Ticket-02: số chuẩn, 3 Đêm). Yêu cầu gốc: lab board (tab Phase N). Giả định & tiêu chí nghiệm thu: `docs/notes/phase-N.md`.
+Game 3D web (Three.js) + headless Node theo **Test Contract v1.2** (Ticket-02 số chuẩn, 3 Đêm; Ticket-03 đèn có dầu, thắng ở bình minh — xem `docs/adr/`). Yêu cầu gốc: lab board (tab Phase N). Giả định & tiêu chí nghiệm thu: `docs/notes/phase-N.md`.
 
 ## Lệnh
 - Test (contract + unit + scenario + determinism): `npm test`
@@ -12,6 +12,8 @@ Game 3D web (Three.js) + headless Node theo **Test Contract v1.1** (Ticket-02: s
 
 ## Kiến trúc
 - `src/sim.js`: **toàn bộ luật chơi**, thuần, tất định (mulberry32(seed)); `step()` theo đúng 11 bước thứ tự bắt buộc của Ticket-02. Mọi bộ đếm là **số nguyên tick** (không cộng dồn 1/60). Không `Math.random`/`Date`/DOM ở đây.
+- Dầu đèn lưu bằng **đơn vị nguyên 1/60** (`fuelU`, đầy = 6000, ngưỡng yếu 1800); chỉ chia 60 khi xuất. So sánh khoảng cách dùng cùng dung sai ở cả hai chiều chuyển trạng thái (vào/ra `drain`).
+- Luật bị ticket **thay thế**: sửa test cũ + ghi lý do trong `docs/notes/phase-N.md` §1, thêm ADR trong `docs/adr/`, ghi breaking change trong `CHANGELOG.md`.
 - `src/maps.js`: bản đồ chuẩn 3 Đêm (góc a → (r·cos a, y, r·sin a)); `surface(x,z)` = mặt đất cao nhất hoặc `null` (biển mây).
 - `web/palette.js`: màu chuẩn; client **chỉ** lấy màu các thành phần ticket liệt kê từ đây (`tests/palette.test.js`).
 - `src/inputs.js`: đọc file inputs. `headless/run.js`: CLI contract. `web/main.js`: chỉ hiển thị + bàn phím → input contract.

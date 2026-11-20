@@ -3,9 +3,9 @@
 > **Video demo:** _chưa có — sẽ quay ở Phase 4 (Release `v1.0.0`)._
 > Day 12 · AI SDLC Lab · Nguyễn Huy Hoàng · 2A202603366 · Tài liệu lab gốc: [docs/lab/LAB-README.md](docs/lab/LAB-README.md)
 
-Game 3D góc nhìn thứ ba. Mây, người giữ đèn nhỏ tuổi đội nón lá treo đèn lồng, đi qua **ba đêm trên ba hòn đảo** giữa biển mây. Mây gom đom đóm để thắp lại các Đèn Lồng Lớn trước bình minh, đồng thời né và xua **Bóng Mực** và **Gió Lạc**.
+Game 3D góc nhìn thứ ba. Mây, người giữ đèn nhỏ tuổi đội nón lá treo đèn lồng, đi qua **ba đêm trên ba hòn đảo** giữa biển mây. Mây gom đom đóm để thắp và **giữ cho các Đèn Lồng Lớn sáng tới bình minh**, vì đèn cạn dầu dần và Bóng Mực hút dầu. Mây phải né và xua **Bóng Mực** và **Gió Lạc**.
 
-- Trạng thái: **Phase 2** (Ticket-02 + Test Contract v1.1). Giả định và tiêu chí nghiệm thu: [phase-1](docs/notes/phase-1.md), [phase-2](docs/notes/phase-2.md). Bằng chứng: [phase-1](docs/proof/phase-1/README.md), [phase-2](docs/proof/phase-2/README.md).
+- Trạng thái: **Phase 3** (Ticket-03 "Đèn cạn dầu" + Test Contract v1.2). Giả định và tiêu chí nghiệm thu: [phase-1](docs/notes/phase-1.md), [phase-2](docs/notes/phase-2.md), [phase-3](docs/notes/phase-3.md). Quyết định thiết kế: [ADR 0001](docs/adr/0001-lantern-fuel-and-dawn-win.md). Bằng chứng: [phase-1](docs/proof/phase-1/README.md), [phase-2](docs/proof/phase-2/README.md), [phase-3](docs/proof/phase-3/README.md). Thay đổi phá vỡ tương thích: [CHANGELOG](CHANGELOG.md).
 - Công nghệ: JavaScript thuần + Three.js (đặt sẵn trong repo), Node ≥ 18. **Không cần `npm install`.**
 
 ## Cài đặt và chạy (3 lệnh)
@@ -37,31 +37,37 @@ Menu chính → giới thiệu Đêm (tên đảo, lời Ông Đăng) → chơi 
 
 | Đêm | Đảo | Thời gian | Đèn | Đặc điểm |
 |---|---|---|---|---|
-| 1 | Đảo Bến | 300 s | 5 | Đảo tròn bán kính 40 m |
-| 2 | Đảo Cau | 330 s | 6 | Hai đảo nối bằng cầu tre không lan can, bục phóng bay sang đảo kia, có Gió Lạc và Bùa Gió |
-| 3 | Đảo Chuông | 360 s | 7 | 3 tầng, dốc, bục phóng lên tháp chuông, gió mạnh 5 s mỗi 30 s, Bóng Mực nhanh hơn |
+| 1 | Đảo Bến | 240 s | 5 (giữ ≥ 3) | Đảo tròn bán kính 40 m |
+| 2 | Đảo Cau | 270 s | 6 (giữ ≥ 4) | Hai đảo nối bằng cầu tre không lan can, bục phóng bay sang đảo kia, có Gió Lạc và Bùa Gió |
+| 3 | Đảo Chuông | 300 s | 7 (giữ ≥ 5) | 3 tầng, dốc, bục phóng lên tháp chuông, gió mạnh 5 s mỗi 30 s, Bóng Mực nhanh hơn |
 
-## Luật và điểm (số chuẩn Ticket-02)
+## Luật và điểm (Ticket-02 + Ticket-03)
 
-- Tự nhặt đom đóm khi ở gần (≤ 1 m, chênh cao ≤ 1.5 m), mang tối đa **10**. Mỗi đèn cần **10** đom đóm và được nạp nhiều lần.
-- **Tỏa Sáng**: tốn 3 đom đóm, hồi chiêu 3 s. Bóng Mực trong bán kính 5 m bị choáng 2 s và bị đẩy lùi 4 m. Gió Lạc đang đuổi thì bỏ chạy; Gió Lạc đang chạy mà mang đom đóm cướp được thì thả lại.
-- **Lướt**: 14 m/s trong 0.2 s, hồi chiêu 1.5 s.
-- **Bùa Gió**: trong 10 s chạy 7.2 m/s và lướt không có hồi chiêu.
-- Bị Bóng Mực chạm: mất 1 Ngọn Lửa (có 3), rơi một nửa số đom đóm ra xung quanh (nhặt lại được trong 8 s), bất tử 1.5 s.
-- Rơi khỏi đảo: mất 1 Ngọn Lửa và toàn bộ đom đóm, hồi sinh ở điểm xuất phát sau 1 s.
-- Bóng Mực không vào được vùng 6 m quanh đèn đã sáng. Gió Lạc không bị vùng này chặn và chỉ cướp đom đóm, không làm mất lửa.
+- **Mục tiêu**: còn sống khi trời sáng và có ít nhất **60%** số đèn đang sáng (Đêm 1: 3/5, Đêm 2: 4/6, Đêm 3: 5/7). Thắp đủ đèn **không** kết thúc Đêm sớm. Hết Ngọn Lửa thì thua ngay.
+- Tự nhặt đom đóm khi ở gần (≤ 1 m, chênh cao ≤ 1.5 m). **Sức chứa** = 10 + 2 × số lần thắp thành công, tối đa 20.
+- **Đèn**:
+  - Thắp lần đầu cần 10 đom đóm. Khi sáng, đèn có **dầu 100** và mất 1 dầu mỗi giây.
+  - Bấm `E` ở đèn đang sáng để **châm dầu**: mỗi đom đóm cho 10 dầu, tối đa 100.
+  - Hết dầu thì đèn tắt. Đèn đã từng sáng chỉ cần **5** đom đóm để thắp lại.
+- **Đèn yếu** (dầu < 30): nhấp nháy, **mất vùng an toàn**, và Bóng Mực tới **hút dầu** (5 dầu/giây mỗi con). Tỏa Sáng hoặc tới gần (≤ 6 m) để đuổi chúng đi.
+- **Tỏa Sáng**: tốn 3 đom đóm, hồi chiêu 3 s. Bóng Mực trong 5 m bị choáng 2 s và bị đẩy lùi 4 m.
+- **Lướt**: 14 m/s trong 0.2 s, hồi chiêu 1.5 s. **Bùa Gió**: trong 10 s chạy 7.2 m/s và lướt không hồi chiêu.
+- Bị Bóng Mực chạm: mất 1 lửa (có 3), rơi một nửa số đom đóm ra xung quanh, bất tử 1.5 s.
+- Rơi khỏi đảo: mất 1 lửa và toàn bộ đom đóm.
 
 | Sự kiện | Điểm |
 |---|---|
-| Mỗi đom đóm nạp vào đèn | +10 |
-| Thắp một đèn | +100 |
-| Mỗi Bóng Mực trúng Tỏa Sáng (kể cả con đang choáng) | +5 |
-| Khi thắng Đêm: mỗi giây còn lại (làm tròn xuống) | +2 |
-| Khi thắng Đêm: mỗi Ngọn Lửa còn lại | +50 |
+| Mỗi đom đóm nạp vào đèn (thắp, thắp lại, châm dầu) | +5 |
+| Thắp lần đầu / thắp lại | +100 / +40 |
+| Bóng Mực trúng Tỏa Sáng (đang hút dầu) | +5 (+15) |
+| Bình minh, chỉ khi thắng: mỗi đèn đang sáng | +50 + floor(dầu) |
+| Bình minh, chỉ khi thắng: mỗi Ngọn Lửa còn lại | +50 |
 
-Tổng điểm game là tổng điểm của các Đêm đã thắng.
+Tổng điểm game là tổng điểm các Đêm đã thắng.
 
-## Chế độ headless (Test Contract v1.1)
+Cài đặt (được lưu): âm lượng, độ nhạy chuột, **Bảng màu dễ phân biệt** (viền và mắt Bóng Mực màu xanh #00B3FF, cảnh báo màu trắng kèm ⚠). Đèn tắt luôn bị xẹp và rách, nên phân biệt được mà không cần dựa vào màu.
+
+## Chế độ headless (Test Contract v1.2)
 
 Khai báo ở [`game.contract.json`](game.contract.json). `build_cmd` là `node --version` (không cần build).
 
@@ -81,9 +87,9 @@ node headless/run.js --seed 1 --night 1 --ticks 600 --out out.jsonl [--scenario 
 ## Kiểm chứng
 
 ```bash
-npm test                       # contract khớp code + 65 test (unit, 27 scenario qua CLI, 3 Đêm, tất định, bảng màu)
-tools/mutation-check.sh        # 26 lỗi cố ý, mọi lỗi phải bị test bắt
-node tools/proof.js phase-2    # sinh lại bằng chứng headless
+npm test                       # contract khớp code + 77 test (unit, 36 scenario qua CLI, 3 Đêm, tất định, bảng màu)
+tools/mutation-check.sh        # 39 lỗi cố ý, mọi lỗi phải bị test bắt
+node tools/proof.js phase-3    # sinh lại bằng chứng headless
 tools/creative-check.sh        # xoá web/ → output headless phải giống hệt
 node tools/playtest.js --mode campaign --gpu   # chơi client 3D thật (Chrome headless), đo FPS 1280×720
 ```
@@ -106,7 +112,7 @@ Mọi phần sau chỉ nằm ở client (`web/`), không đụng luật chơi (`
    - Nhạc nền theo thang ngũ cung.
    - Hiệu ứng cho nhặt, thắp đèn, tỏa sáng, bị đánh, nhảy, lướt, bùa, Gió Lạc cướp, thắng, thua, Bóng Mực xuất hiện, gió và đếm ngược 10 s cuối.
 
-**Bằng chứng phần cũ vẫn đúng**: [docs/proof/phase-2/creative-check.txt](docs/proof/phase-2/creative-check.txt). `src/` và `headless/` không import gì từ `web/`. Chạy bản sao **không có thư mục `web/`** cho đầu ra giống hệt từng byte ở 27 scenario và một Đêm đầy đủ của cả 3 bản đồ.
+**Bằng chứng phần cũ vẫn đúng**: [docs/proof/phase-3/creative-check.txt](docs/proof/phase-3/creative-check.txt). `src/` và `headless/` không import gì từ `web/`. Chạy bản sao **không có thư mục `web/`** cho đầu ra giống hệt từng byte ở 36 scenario và một Đêm đầy đủ của cả 3 bản đồ. Ở Phase 3, các ý sáng tạo được chỉnh theo luật mới: trận pháp vùng an toàn biến mất khi đèn yếu, và cột sáng tắt khi đèn cạn dầu.
 
 ## Cấu trúc
 

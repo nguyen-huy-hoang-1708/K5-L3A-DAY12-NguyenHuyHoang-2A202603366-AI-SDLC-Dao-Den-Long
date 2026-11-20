@@ -9,7 +9,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const phase = process.argv[2] || 'phase-2';
+const phase = process.argv[2] || 'phase-3';
 const OUT = path.join(ROOT, 'docs/proof', phase, 'headless');
 fs.mkdirSync(OUT, { recursive: true });
 const node = process.execPath;
@@ -23,7 +23,7 @@ console.log(`npm test exit ${t.status}`);
 
 // 2) Each fixture -> output jsonl (kept small: snapshot every 60).
 const scen = path.join(ROOT, 'tests/scenarios');
-const ticks = { idle: 600, walk_forward: 60, pickup: 60, light_one: 30, win: 600, hit: 400, lose_flames: 1000, dawn: 100, pulse: 400, safe_zone: 900, preset_lit: 10, default_spawn: 1801, dash: 120, fall: 200, fall_last_flame: 300, dropped_ttl: 20, n2_pad: 150, n3_ramp: 120, n3_wall: 120, n3_pad: 120, wind: 2200, drifter_steal: 300, drifter_pulse_chase: 300, drifter_pulse_drop: 200, charm: 140, pause: 100, safe_evict: 600 };
+const ticks = { idle: 600, walk_forward: 60, pickup: 60, light_one: 30, win: 600, hit: 400, lose_flames: 1000, dawn: 100, pulse: 400, safe_zone: 900, preset_lit: 10, default_spawn: 1801, dash: 120, fall: 200, fall_last_flame: 300, dropped_ttl: 20, n2_pad: 150, n3_ramp: 120, n3_wall: 120, n3_pad: 120, wind: 2200, drifter_steal: 300, drifter_pulse_chase: 300, drifter_pulse_drop: 200, charm: 140, pause: 100, safe_evict: 600, fuel_decay: 600, fuel_out: 100, refuel: 10, relight: 10, drain: 260, drain_exit: 130, dawn_win: 100, dawn_lose: 100, no_early_win: 300 };
 const rows = [];
 for (const name of fs.readdirSync(scen).sort()) {
   const d = path.join(scen, name);
