@@ -9,10 +9,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
       - uses: actions/setup-node@v4
         with: { node-version: '${{ matrix.node }}' }
       - run: npm test
       - run: ./tools/mutation-check.sh
+      - name: Creative additions do not change headless output (vs tag phase-1, if present)
+        run: |
+          git fetch --tags --depth=1 origin 'refs/tags/phase-1:refs/tags/phase-1' 2>/dev/null || true
+          if git rev-parse -q --verify phase-1 >/dev/null; then ./tools/creative-check.sh phase-1; else echo "no phase-1 tag, skipped"; fi
       - name: Headless contract smoke + determinism
         run: |
           node headless/run.js --seed 9 --night 1 --ticks 3000 --out a.jsonl

@@ -73,7 +73,13 @@ CI: [.github/workflows/ci.yml](.github/workflows/ci.yml) chạy test + mutation 
 
 ## Sáng tạo của tôi
 
-Mọi phần sau chỉ nằm ở client (`web/main.js`), **không** đụng `src/sim.js`, nên đầu ra headless không đổi (bằng chứng: `npm test` + hash tất định trong [docs/proof/phase-1/headless/README.md](docs/proof/phase-1/headless/README.md) không phụ thuộc thư mục `web/`).
+Mọi phần sau chỉ nằm ở client (`web/`), **không** đụng luật chơi `src/sim.js`, nên đầu ra headless theo contract không đổi. Không có thực thể nào được thêm vào sim, nên không cần tắt gì khi chạy headless.
+
+**Bằng chứng phần cũ vẫn đúng** — [docs/proof/phase-1/creative-check.txt](docs/proof/phase-1/creative-check.txt), sinh bởi `tools/creative-check.sh`:
+- `src/` và `headless/` không import gì từ `web/`; kể từ tag `phase-1`, không file nào trong `src/`, `headless/`, `game.contract.json` thay đổi.
+- Đầu ra headless **giống hệt từng byte** giữa tag `phase-1` (giao diện cũ) và bản hiện tại (giao diện tiên hiệp): 12/12 kịch bản trong `tests/scenarios` và 4 đêm đầy đủ 18000 tick (seed 1, 7, 42, 2026).
+- `npm test` 33/33 đạt; playtest client thật thắng + thua, 0 lỗi console.
+
 
 1. **Phong cách tiên hiệp / kiếm hiệp**: đảo nổi giữa biển mây, núi đá dựng đứng trong sương, đảo nhỏ trôi lơ lửng, trăng và sao, bảo tháp, thông, hoa đào rơi, lan can đá đỏ ở mép đảo (chính là giới hạn di chuyển `island_radius`). Hậu kỳ **bloom** làm đèn, đom đóm và hiệu ứng phát sáng.
 2. **Đèn Lồng Lớn kiểu cổng gỗ sơn son, đèn giấy đỏ**: khi thắp có **cột sáng lên trời**, tia lửa bung ra; **trận pháp** xoay dưới chân đèn vẽ đúng `safe_radius`; 5 hạt sáng quanh chân đèn cho biết đã nạp bao nhiêu/5.
