@@ -9,7 +9,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const phase = process.argv[2] || 'phase-1';
+const phase = process.argv[2] || 'phase-2';
 const OUT = path.join(ROOT, 'docs/proof', phase, 'headless');
 fs.mkdirSync(OUT, { recursive: true });
 const node = process.execPath;
@@ -23,37 +23,35 @@ console.log(`npm test exit ${t.status}`);
 
 // 2) Each fixture -> output jsonl (kept small: snapshot every 60).
 const scen = path.join(ROOT, 'tests/scenarios');
-const ticks = { idle: 600, walk_forward: 60, pickup: 60, light_one: 30, win: 600, hit: 400, lose_flames: 1000, dawn: 100, pulse: 400, safe_zone: 900, preset_lit: 10, default_spawn: 1801 };
+const ticks = { idle: 600, walk_forward: 60, pickup: 60, light_one: 30, win: 600, hit: 400, lose_flames: 1000, dawn: 100, pulse: 400, safe_zone: 900, preset_lit: 10, default_spawn: 1801, dash: 120, fall: 200, fall_last_flame: 300, dropped_ttl: 20, n2_pad: 150, n3_ramp: 120, n3_wall: 120, n3_pad: 120, wind: 2200, drifter_steal: 300, drifter_pulse_chase: 300, drifter_pulse_drop: 200, charm: 140, pause: 100, safe_evict: 600 };
 const rows = [];
 for (const name of fs.readdirSync(scen).sort()) {
   const d = path.join(scen, name);
-  const args = ['headless/run.js', '--seed', name === 'default_spawn' ? '7' : '1', '--night', '1', '--ticks', String(ticks[name] || 600), '--out', path.join(OUT, `${name}.jsonl`), '--snapshot-every', '60'];
+  const meta = fs.existsSync(path.join(d, 'meta.json')) ? JSON.parse(fs.readFileSync(path.join(d, 'meta.json'), 'utf8')) : {};
+  const args = ['headless/run.js', '--seed', name === 'default_spawn' ? '7' : '1', '--night', String(meta.night || 1), '--ticks', String(ticks[name] || 600), '--out', path.join(OUT, `${name}.jsonl`), '--snapshot-every', '60'];
   if (fs.existsSync(path.join(d, 'scenario.json'))) args.push('--scenario', `tests/scenarios/${name}/scenario.json`);
   if (fs.existsSync(path.join(d, 'inputs.json'))) args.push('--inputs', `tests/scenarios/${name}/inputs.json`);
   const r = sh(args);
   const lines = fs.readFileSync(path.join(OUT, `${name}.jsonl`), 'utf8').trim().split('\n').map((l) => JSON.parse(l));
   const evs = lines.filter((l) => l.type === 'event').map((e) => `${e.tick}:${e.name}`);
-  rows.push({ name, cmd: `node ${args.join(' ')}`, exit: r.status, end: lines.at(-1), events: evs.slice(0, 8).join(' ') + (evs.length > 8 ? ' …' : '') });
+  rows.push({ name, night: meta.night || 1, cmd: `node ${args.join(' ')}`, exit: r.status, end: lines.at(-1), events: evs.slice(0, 8).join(' ') + (evs.length > 8 ? ' …' : '') });
 }
 
 // 3) Determinism: full default game, two runs, compare hashes.
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'ddl-proof-'));
 const det = [];
-for (const seed of [1, 42, 2026]) {
+const timing = [];
+for (const night of [1, 2, 3]) for (const seed of [1, 42]) {
   const h = [];
   for (const run of [1, 2]) {
-    const f = path.join(tmp, `s${seed}-${run}.jsonl`);
-    sh(['headless/run.js', '--seed', String(seed), '--night', '1', '--ticks', '18000', '--scenario', 'tests/scenarios/default_spawn/scenario.json', '--out', f]);
+    const f = path.join(tmp, `n${night}-s${seed}-${run}.jsonl`);
+    const t0 = process.hrtime.bigint();
+    sh(['headless/run.js', '--seed', String(seed), '--night', String(night), '--ticks', '21600', '--scenario', 'tests/scenarios/default_spawn/scenario.json', '--out', f]);
+    if (run === 1 && seed === 1) timing.push({ night, ms: Number(process.hrtime.bigint() - t0) / 1e6, end: fs.readFileSync(f, 'utf8').trim().split('\n').at(-1) });
     h.push(sha(f));
   }
-  det.push({ seed, run1: h[0], run2: h[1], identical: h[0] === h[1] });
+  det.push({ night, seed, run1: h[0], run2: h[1], identical: h[0] === h[1] });
 }
-
-// 4) Timing: full night (18000 ticks) with default spawns.
-const t0 = process.hrtime.bigint();
-sh(['headless/run.js', '--seed', '1', '--night', '1', '--ticks', '18000', '--scenario', 'tests/scenarios/default_spawn/scenario.json', '--out', path.join(tmp, 'perf.jsonl')]);
-const perfEnd = fs.readFileSync(path.join(tmp, 'perf.jsonl'), 'utf8').trim().split('\n').at(-1);
-const ms = Number(process.hrtime.bigint() - t0) / 1e6;
 
 const md = [
   `# Headless evidence — ${phase}`,
@@ -65,17 +63,21 @@ const md = [
   '',
   '## Fixture runs (tests/scenarios/*)',
   '',
-  '| Scenario | Exit | End line | First events |',
-  '|---|---|---|---|',
-  ...rows.map((r) => `| ${r.name} | ${r.exit} | \`${JSON.stringify(r.end)}\` | ${r.events || '—'} |`),
+  '| Scenario | Night | Exit | End line | First events |',
+  '|---|---|---|---|---|',
+  ...rows.map((r) => `| ${r.name} | ${r.night} | ${r.exit} | \`${JSON.stringify(r.end)}\` | ${r.events || '—'} |`),
   '',
-  '## Determinism (18000 ticks = full night, default world + `player.flames: 1000` so the run lasts until dawn, no inputs)',
+  '## Determinism (21600 ticks, default world of each night + `player.flames: 1000` so the run lasts until dawn, no inputs)',
   '',
-  '| Seed | sha256 run 1 | sha256 run 2 | Identical |',
-  '|---|---|---|---|',
-  ...det.map((d) => `| ${d.seed} | \`${d.run1.slice(0, 16)}…\` | \`${d.run2.slice(0, 16)}…\` | ${d.identical ? 'yes' : '**NO**'} |`),
+  '| Night | Seed | sha256 run 1 | sha256 run 2 | Identical |',
+  '|---|---|---|---|---|',
+  ...det.map((d) => `| ${d.night} | ${d.seed} | \`${d.run1.slice(0, 16)}…\` | \`${d.run2.slice(0, 16)}…\` | ${d.identical ? 'yes' : '**NO**'} |`),
   '',
-  `## Timing: full night (same setup, snapshot every 10) = ${ms.toFixed(0)} ms wall clock incl. Node start-up; end line \`${perfEnd}\``,
+  '## Timing: one full night, 21600 ticks, snapshot every 10 (limit: 30 s)',
+  '',
+  '| Night | Wall clock incl. Node start-up | End line |',
+  '|---|---|---|',
+  ...timing.map((x) => `| ${x.night} | ${x.ms.toFixed(0)} ms | \`${x.end}\` |`),
   '',
 ];
 fs.writeFileSync(path.join(OUT, 'README.md'), md.join('\n'));

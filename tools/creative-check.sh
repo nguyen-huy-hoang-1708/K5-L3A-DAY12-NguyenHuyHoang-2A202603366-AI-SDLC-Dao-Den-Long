@@ -1,36 +1,32 @@
 #!/usr/bin/env bash
-# Proof that creative additions (client-only, in web/) do not change contract headless output.
+# Proof that creative additions (client-only, in web/) cannot change contract headless output.
 #  1) Static: the headless path (headless/, src/) never imports anything from web/.
-#  2) Dynamic: headless output is byte-identical between BASE (default: tag ui-classic) and the working tree,
-#     for every fixture in tests/scenarios and full default nights on several seeds.
-# Usage: tools/creative-check.sh [base-ref]   (default: tag ui-classic = Phase 1 before the xianxia UI)
+#  2) Dynamic: copy ONLY the headless path (no web/ at all) to a temp dir and check its output is byte-identical to the
+#     repo's, for every fixture in tests/scenarios (with its night) and a full default night on each of the 3 maps.
+# (Phase 1 compared against tag ui-classic; since Ticket-02 changed the rules themselves, the base is now "no web/".)
 set -u
 cd "$(dirname "$0")/.."
-BASE=${1:-ui-classic}
-echo "== creative-check: base=$BASE ($(git rev-parse --short "$BASE")) vs HEAD=$(git rev-parse --short HEAD)$(git diff --quiet -- src headless || echo ' +uncommitted')"
+echo "== creative-check at $(git rev-parse --short HEAD)$(git diff --quiet -- src headless || echo ' +uncommitted') — repo vs. headless path without web/"
 fail=0
-if grep -rnE "from ['\"][./]*web/|require\(['\"][./]*web/" src headless; then echo "FAIL: headless path imports web/"; fail=1; else echo "ok   headless/ and src/ do not import web/"; fi
-echo "     files changed since $BASE: $(git diff --name-only "$BASE" -- . | tr '\n' ' ')"
-core=$(git diff --name-only "$BASE" -- src headless game.contract.json | tr '\n' ' ')
-echo "     of which in headless path (src/ headless/ game.contract.json): ${core:-none}"
-TMP=$(mktemp -d); trap 'git worktree remove --force "$TMP/base" >/dev/null 2>&1; rm -rf "$TMP"' EXIT
-git worktree add -q --detach "$TMP/base" "$BASE"
-run() { # $1=root $2=out $3..=args
-  local root=$1 out=$2; shift 2; node "$root/headless/run.js" --night 1 --out "$out" "$@"
-}
-n=0
+if grep -rnE "from ['\"][./]*web/|require\(['\"][./]*web/|import\(['\"][./]*web/" src headless; then echo "FAIL: headless path imports web/"; fail=1; else echo "ok   headless/ and src/ do not import web/"; fi
+TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
+mkdir -p "$TMP/core"
+cp -R src headless package.json "$TMP/core/"
+[ -d "$TMP/core/web" ] && { echo "FAIL: web/ leaked into copy"; fail=1; }
+run() { local root=$1 out=$2; shift 2; node "$root/headless/run.js" --out "$out" "$@"; }
 for d in tests/scenarios/*/; do
-  name=$(basename "$d"); args=(--seed 5 --ticks 1800)
+  name=$(basename "$d"); night=1
+  [ -f "$d/meta.json" ] && night=$(node -e "console.log(JSON.parse(require('fs').readFileSync('$d/meta.json','utf8')).night||1)")
+  args=(--seed 5 --night "$night" --ticks 1800)
   [ -f "$d/scenario.json" ] && args+=(--scenario "$PWD/$d/scenario.json")
   [ -f "$d/inputs.json" ] && args+=(--inputs "$PWD/$d/inputs.json")
-  run "$TMP/base" "$TMP/a.jsonl" "${args[@]}"; run "$PWD" "$TMP/b.jsonl" "${args[@]}"
-  if cmp -s "$TMP/a.jsonl" "$TMP/b.jsonl"; then echo "ok   fixture $name identical ($(wc -l < "$TMP/a.jsonl" | tr -d ' ') lines)"; else echo "FAIL fixture $name differs"; fail=1; fi
-  n=$((n+1))
+  run "$TMP/core" "$TMP/a.jsonl" "${args[@]}"; run "$PWD" "$TMP/b.jsonl" "${args[@]}"
+  if cmp -s "$TMP/a.jsonl" "$TMP/b.jsonl"; then echo "ok   fixture $name (night $night) identical ($(wc -l < "$TMP/a.jsonl" | tr -d ' ') lines)"; else echo "FAIL fixture $name differs"; fail=1; fi
 done
-for seed in 1 7 42 2026; do
-  run "$TMP/base" "$TMP/a.jsonl" --seed $seed --ticks 18000 --scenario "$PWD/tests/scenarios/default_spawn/scenario.json"
-  run "$PWD" "$TMP/b.jsonl" --seed $seed --ticks 18000 --scenario "$PWD/tests/scenarios/default_spawn/scenario.json"
+for night in 1 2 3; do
+  run "$TMP/core" "$TMP/a.jsonl" --seed 2026 --night $night --ticks 21600 --scenario "$PWD/tests/scenarios/default_spawn/scenario.json"
+  run "$PWD" "$TMP/b.jsonl" --seed 2026 --night $night --ticks 21600 --scenario "$PWD/tests/scenarios/default_spawn/scenario.json"
   h=$(shasum -a 256 "$TMP/b.jsonl" | cut -c1-16)
-  if cmp -s "$TMP/a.jsonl" "$TMP/b.jsonl"; then echo "ok   full night seed $seed identical (sha256 $h…)"; else echo "FAIL full night seed $seed differs"; fail=1; fi
+  if cmp -s "$TMP/a.jsonl" "$TMP/b.jsonl"; then echo "ok   full night $night identical (sha256 $h…)"; else echo "FAIL full night $night differs"; fail=1; fi
 done
-[ $fail = 0 ] && echo "PASS: creative additions leave headless contract output unchanged" || { echo "FAIL"; exit 1; }
+[ $fail = 0 ] && echo "PASS: creative additions in web/ leave headless contract output unchanged" || { echo "FAIL"; exit 1; }
