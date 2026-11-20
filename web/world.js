@@ -120,7 +120,7 @@ function jagged(geo, amt) {
 }
 
 // ---------- sky, stars, moon, peaks, cloud sea (shared by all nights) ----------
-export function buildSky(scene) {
+export function buildSky(scene, { bench = false } = {}) {
   const uni = { top: { value: new THREE.Color(PALETTE.sky) }, hor: { value: new THREE.Color(PALETTE.fog) }, k: { value: 0 } };
   const sky = new THREE.Mesh(
     new THREE.SphereGeometry(600, 32, 16),
@@ -156,7 +156,7 @@ export function buildSky(scene) {
     m.position.set(Math.cos(a) * dist, -30 + h / 2, Math.sin(a) * dist);
     peaks.add(m);
   }
-  scene.add(peaks);
+  if (!bench) scene.add(peaks); // distant peaks are a creative extra: off in the bench scene
   const clouds = [];
   for (const [y, op, sc] of [[-9, 0.5, 5], [-15, 0.65, 3.5], [-24, 0.9, 2.5]]) {
     const map = cloudTex.clone();
@@ -269,15 +269,15 @@ function decorate(group, cx, cz, r0, r1, n, avoid) {
 }
 
 /** Build the static world of a night from its standard map. */
-export function buildNight(night, map) {
+export function buildNight(night, map, { bench = false } = {}) {
   resetVrand(1000 + night);
   const g = new THREE.Group();
   const pads = [];
   const avoid = [...map.lanterns, ...map.motePoints, ...map.pads.map((p) => p.pos), ...map.charms.map((c) => c.pos)];
   if (night === 1) {
     g.add(disc(0, 0, 40));
-    decorate(g, 0, 0, 35.5, 38.5, 40, avoid);
-    for (const a of [36, 108, 180, 252, 324]) {
+    if (!bench) decorate(g, 0, 0, 35.5, 38.5, 40, avoid);
+    if (!bench) for (const a of [36, 108, 180, 252, 324]) {
       const p = makePagoda(3);
       const rad = (a * Math.PI) / 180;
       p.position.set(Math.cos(rad) * 36, 0, Math.sin(rad) * 36);

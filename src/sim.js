@@ -106,7 +106,7 @@ const groundOr0 = (g, x, z) => {
 /**
  * Create a new game. opts: { seed, night (1..3), scenario }
  */
-export function createGame({ seed = 0, night = 1, scenario = null } = {}) {
+export function createGame({ seed = 0, night = 1, scenario = null, bench = false } = {}) {
   const map = MAPS[night];
   if (!map) throw new Error(`night ${night} not available (1, 2, 3)`);
   const sc = scenario || {};
@@ -117,7 +117,7 @@ export function createGame({ seed = 0, night = 1, scenario = null } = {}) {
     return sc[k];
   };
   const g = {
-    night, map, rng: mulberry32(seed),
+    night, map, rng: mulberry32(seed), bench: !!bench, // bench (Ticket-04): no spawns, damage, pickup, fuel loss or night end
     tick: 0, simTick: 0, state: 'playing', paused: false, score: 0,
     timeLeft0: map.duration_s,
     player: {
@@ -437,7 +437,7 @@ export function step(g, input) {
     else s.drainT = 0;
   }
   for (const l of g.lanterns) {
-    if (!l.lit) continue;
+    if (!l.lit || g.bench) continue;
     const drainers = g.shades.filter((s) => s.state === 'drain' && s.targetL === l).length;
     l.fuelU -= K.DECAY_U + K.DRAIN_U * drainers;
   }
@@ -565,7 +565,7 @@ export function step(g, input) {
   }
 
   // 4) Pick up motes and charms.
-  if (!P.dead) {
+  if (!P.dead && !g.bench) {
     for (let i = 0; i < g.motes.length && P.carried < capacity(P); ) {
       const m = g.motes[i];
       if (m.born < g.tick && distXZ(m.pos, P.pos) <= TUNING.pickup_radius && Math.abs(P.pos[1] - m.pos[1]) <= K.PICK_DY) {
@@ -751,7 +751,7 @@ export function step(g, input) {
   }
 
   // 9) Contacts: drifters steal first, then one shade hit (ascending id).
-  if (!P.dead) {
+  if (!P.dead && !g.bench) {
     for (const d of [...g.drifters].sort((a, b) => a.n - b.n)) {
       if (d.state !== 'chase' || distXZ(d.pos, P.pos) > K.DRIFT_TOUCH) continue;
       const amount = Math.min(K.DRIFT_STEAL, P.carried);
@@ -790,14 +790,14 @@ export function step(g, input) {
 
   // 10) Scheduled spawns (new entities interact from the next tick).
   const t = g.simTick;
-  if (g.randomMotes && t % K.MOTE_EVERY === 0 && g.motes.length < K.MOTE_CAP) {
+  if (g.bench) { /* no scheduled spawns in the bench scene */ } else if (g.randomMotes && t % K.MOTE_EVERY === 0 && g.motes.length < K.MOTE_CAP) {
     const empty = map.motePoints.filter((p) => !g.motes.some((m) => m.kind === 'random' && distXZ(m.pos, p) < 0.01 && Math.abs(m.pos[1] - p[1]) < 0.01));
     if (empty.length) {
       const p = empty[Math.floor(g.rng() * empty.length)];
       g.motes.push({ id: `M${g.nextMote++}`, pos: [...p], kind: 'random', ttl: null, born: g.tick });
     }
   }
-  if (g.randomShades && t >= K.SHADE_FIRST && (t - K.SHADE_FIRST) % map.shadeEvery === 0) {
+  if (!g.bench && g.randomShades && t >= K.SHADE_FIRST && (t - K.SHADE_FIRST) % map.shadeEvery === 0) {
     const count = t === K.SHADE_FIRST ? 2 : 1;
     const taken = new Set();
     for (let i = 0; i < count && g.shades.length < map.shadeMax; i++) {
@@ -813,13 +813,14 @@ export function step(g, input) {
       emit(g, 'shade_spawned', { id: s.id });
     }
   }
-  if (g.randomDrifters && t % K.DRIFT_EVERY === 0 && g.drifters.filter((d) => d.state !== 'removed').length < K.DRIFT_MAX) {
+  if (!g.bench && g.randomDrifters && t % K.DRIFT_EVERY === 0 && g.drifters.filter((d) => d.state !== 'removed').length < K.DRIFT_MAX) {
     const p = map.shadePoints[Math.floor(g.rng() * map.shadePoints.length)];
     const id = freshId(g, 'D', g.drifters);
     g.drifters.push({ id, n: idNum(id), pos: [p[0], groundOr0(g, p[0], p[2]) + K.DRIFT_HOVER, p[2]], state: 'idle', stolen: 0, ticks: 0, target: null, born: g.tick });
   }
 
   // 11) Win / lose.
+  if (g.bench) return g.events;
   if (P.flames <= 0) endGame(g, 'lost', 'no_flames');
   else if (timeLeft(g) <= 1e-9) {
     const need = Math.ceil((g.lanterns.length * 6) / 10); // ceil(0.6 × total), exact integer arithmetic

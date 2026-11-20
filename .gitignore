@@ -4,3 +4,6 @@ node_modules/
 *.jsonl
 !docs/proof/**/*.jsonl
 .DS_Store
+data/
+bench.tmp.json
+dist/

@@ -6,12 +6,14 @@ import { RenderPass } from './vendor/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from './vendor/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from './vendor/jsm/postprocessing/OutputPass.js';
 import { createGame, step, TUNING, TICK_RATE, timeLeft, MAPS, capacity } from '../src/sim.js';
+import { benchScenario, benchCamera, benchStats, BENCH } from '../src/bench.js';
 import { PALETTE, PALETTE_CB, ambientIntensity } from './palette.js';
 import { TAU, glowTex, runeTex, petalTex, leafTex, talismanTex, MAT, buildSky, buildNight } from './world.js';
 
 const params = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
 const SPEED = Math.max(1, Math.min(8, Number(params.get('speed') || 1))); // debug/playtest only
+const IS_BENCH = params.has('bench'); // Ticket-04 benchmark scene (tools/bench.js)
 const NIGHT_LINES = {
   1: 'Mây à, sương mực đã phủ kín Đảo Bến. Đèn giờ cạn dầu dần — thắp đèn rồi nhớ quay lại châm dầu, giữ đủ đèn sáng tới bình minh. Đừng bước ra mép đảo — dưới kia chỉ có biển mây.',
   2: 'Đảo Cau có hai hòn nối nhau bằng cầu tre không lan can. Bục gió sẽ đưa con bay sang hòn bên kia. Coi chừng Gió Lạc — chúng chỉ chực cướp đom đóm khi con mang nhiều.',
@@ -27,7 +29,7 @@ const saveSettings = () => { try { localStorage.setItem('ddl-settings', JSON.str
 
 // ---------- renderer / post ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+renderer.setPixelRatio(IS_BENCH ? 1 : Math.min(devicePixelRatio, 1.5)); // bench renders exactly 1280×720
 renderer.setSize(innerWidth, innerHeight);
 document.body.prepend(renderer.domElement);
 const scene = new THREE.Scene();
@@ -42,7 +44,7 @@ const hemi = new THREE.HemisphereLight('#a8b8ff', '#2a2440', ambientIntensity(0,
 const moonLight = new THREE.DirectionalLight('#c8d0ff', 0.45);
 moonLight.position.set(-36, 34, -63);
 scene.add(hemi, moonLight);
-const sky = buildSky(scene);
+const sky = buildSky(scene, { bench: IS_BENCH });
 
 // ---------- particles ----------
 const NP = 900;
@@ -421,7 +423,7 @@ function startNight(n) {
   game = createGame({ seed, night: n, scenario });
   window.__game = game;
   if (world) scene.remove(world.group);
-  world = buildNight(n, MAPS[n]);
+  world = buildNight(n, MAPS[n], { bench: IS_BENCH });
   scene.add(world.group);
   clearViews();
   for (const l of game.lanterns) {
@@ -813,8 +815,12 @@ function frame(now) {
       if (wasGrounded && game.player.launch) SFX.dash();
       acc -= 1 / TICK_RATE;
     }
+  } else if (screen === 'bench') {
+    acc += dt;
+    while (acc >= 1 / TICK_RATE) { step(game, BENCH_INPUT); acc -= 1 / TICK_RATE; }
   } else acc = 0;
   sync(now / 1000, dt);
+  if (screen === 'bench') benchFrame(now);
   composer.render();
   perf.frames++;
   if (now - perf.t0 >= 1000) {
@@ -832,8 +838,64 @@ addEventListener('resize', () => {
   composer.setSize(innerWidth, innerHeight);
 });
 
+// ---------- benchmark scene (Ticket-04 §1) ----------
+const BENCH_INPUT = { move: [0, 0], cam_yaw_deg: 0 };
+const benchState = (window.__bench = { phase: 'loading', first_frame_epoch_ms: null, dts: [], result: null });
+let benchT0 = 0, benchPrev = 0;
+function startBench() {
+  const seed = Number(params.get('seed') || 42);
+  const duration = Number(params.get('duration') || 30);
+  night = 1;
+  game = createGame({ seed, night: 1, scenario: benchScenario(seed), bench: true });
+  window.__game = game;
+  if (world) scene.remove(world.group);
+  world = buildNight(1, MAPS[1], { bench: true });
+  scene.add(world.group);
+  clearViews();
+  for (const l of game.lanterns) {
+    const v = makeLantern(TUNING.lantern_cost);
+    v.position.set(...l.pos);
+    if (l.lit) v.userData.glow = 1;
+    scene.add(v);
+    views.lanterns.set(l.id, v);
+  }
+  petals.pts.visible = leaves.pts.visible = false; // creative extras off in the standard scene
+  benchState.duration = duration;
+  benchState.seed = seed;
+  screen = 'bench';
+  hideCard();
+  $('hud').classList.remove('hidden');
+}
+function benchFrame(now) {
+  if (benchState.first_frame_epoch_ms === null) {
+    benchState.first_frame_epoch_ms = performance.timeOrigin + now;
+    benchT0 = now;
+    benchState.phase = 'warmup';
+  }
+  const t = (now - benchT0) / 1000;
+  camera.position.set(...benchCamera(t));
+  camera.lookAt(0, 0, 0);
+  if (t >= BENCH.WARMUP_S) {
+    if (benchState.phase === 'warmup') benchState.phase = 'measure';
+    else benchState.dts.push(now - benchPrev);
+    if (t >= BENCH.WARMUP_S + benchState.duration && benchState.phase === 'measure') {
+      benchState.phase = 'done';
+      const gl = renderer.getContext();
+      const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+      benchState.result = {
+        ...benchStats(benchState.dts),
+        renderer: `three.js r${THREE.REVISION} WebGL${renderer.capabilities.isWebGL2 ? '2' : '1'} + UnrealBloom · ${dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER)} · ${navigator.userAgent.match(/Chrome\/[\d.]+/)?.[0] || navigator.userAgent}`,
+        canvas: [renderer.domElement.width, renderer.domElement.height, devicePixelRatio],
+        viewport: [innerWidth, innerHeight],
+      };
+    }
+  }
+  benchPrev = now;
+}
+
 window.__ui = { get screen() { return screen; }, get night() { return night; }, won, settings };
 applyCB();
-if (params.has('autostart')) startNight(Number(params.get('night')) || 1);
+if (IS_BENCH) startBench();
+else if (params.has('autostart')) startNight(Number(params.get('night')) || 1);
 else showMenu();
 requestAnimationFrame(frame);
