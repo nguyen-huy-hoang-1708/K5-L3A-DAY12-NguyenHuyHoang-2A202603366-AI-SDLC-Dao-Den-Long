@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Đảo Đèn Lồng</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #120a1f; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: #ffe9c2; }
+    canvas { display: block; }
+    #hud { position: fixed; top: 12px; left: 12px; right: 12px; display: flex; gap: 10px; flex-wrap: wrap; pointer-events: none; }
+    .pill { background: rgba(20, 10, 35, .72); border: 1px solid rgba(255, 190, 110, .35); border-radius: 12px; padding: 6px 12px; font-size: 15px; font-variant-numeric: tabular-nums; }
+    .pill b { color: #ffc46b; }
+    #hint { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 13px; opacity: .85; background: rgba(20,10,35,.6); padding: 6px 12px; border-radius: 10px; pointer-events: none; text-align: center; }
+    #prompt { position: fixed; bottom: 52px; left: 50%; transform: translateX(-50%); font-size: 16px; color: #fff3d6; text-shadow: 0 0 8px #ff9a3c; pointer-events: none; }
+    #overlay { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(10, 5, 20, .55); }
+    #overlay.hidden { display: none; }
+    .card { text-align: center; max-width: 520px; padding: 28px 32px; background: rgba(28, 14, 46, .92); border: 1px solid rgba(255, 190, 110, .45); border-radius: 18px; box-shadow: 0 0 40px rgba(255, 150, 60, .25); }
+    .card h1 { margin: 0 0 6px; color: #ffc46b; font-size: 34px; }
+    .card p { line-height: 1.5; margin: 8px 0; }
+    .card kbd { background: #3a2456; border-radius: 5px; padding: 1px 6px; font-family: inherit; }
+    .flash { animation: flash .35s ease-out; }
+    @keyframes flash { from { box-shadow: 0 0 0 4px rgba(255,80,120,.8);} to { box-shadow: none; } }
+  </style>
+  <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+</head>
+<body>
+  <div id="hud">
+    <div class="pill" id="h-flames">Lửa <b>3</b></div>
+    <div class="pill" id="h-carried">Đom đóm <b>0/10</b></div>
+    <div class="pill" id="h-lanterns">Đèn <b>0/5</b></div>
+    <div class="pill" id="h-time">Còn <b>5:00</b></div>
+    <div class="pill" id="h-score">Điểm <b>0</b></div>
+    <div class="pill" id="h-pulse">Tỏa sáng <b>sẵn sàng</b></div>
+  </div>
+  <div id="prompt"></div>
+  <div id="hint">WASD di chuyển · Kéo chuột / Q Z xoay camera · Space nhảy · E nạp đèn · F tỏa sáng · M tắt/bật âm · R chơi lại</div>
+  <div id="overlay"><div class="card" id="card"></div></div>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
