@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.0.0 / phase-4 — Ticket-04 "Bình minh: phát hành v1.0.0" + Test Contract v1.3
+- **Contract v1.3**: thêm `bench_cmd` (`node tools/bench.js`) và `soak_cmd` (`node --jitless --expose-gc headless/soak.js`). Luật và số liệu không đổi: đầu ra headless giống hệt tag `phase-3`.
+- **Benchmark**:
+  - Cảnh chuẩn gồm 200 Bóng Mực, 100 đom đóm và đèn L1–L3 sáng; camera bay vòng. Chạy trong cửa sổ Chrome 1280×720, vsync tắt.
+  - Kết quả ghi ra `bench.json`. Sim có thêm chế độ `bench`: không sinh thêm thực thể, không sát thương, không nhặt, không hao dầu, không kết thúc Đêm.
+- **Soak**: 10 Đêm trong một tiến trình, input ngẫu nhiên theo seed, kết quả ghi ra `soak.json`.
+- **Bảng xếp hạng cục bộ**:
+  - Nhập tên sau màn Bình Minh hoặc sau khi thua (hỗ trợ tiếng Việt). Giữ top 10, lưu ra đĩa qua API của `tools/serve.js`.
+  - Có màn hình bảng xếp hạng từ menu và lệnh `--export-leaderboard`.
+- **Dễ tiếp cận**:
+  - Đổi phím cho 9 hành động, có báo trùng và khôi phục mặc định.
+  - Phụ đề cho Bóng Mực xuất hiện (kèm mũi tên chỉ hướng), gió, 10 s cuối và đèn yếu.
+  - Tùy chọn giảm chuyển động; chữ ≥ 18 px và tùy chọn chữ lớn ×1.25.
+  - ⚠ Phím lướt `Q` dự phòng bị bỏ; phím mặc định là `Shift` trái và đổi được.
+- **Phát hành**:
+  - `npm run dist` tạo `dist/dao-den-long-v1.0.0-web.zip` (bản web tĩnh + server).
+  - Video `docs/demo/demo.mp4` được quay từ game chạy thật (`tools/make-demo.js`).
+  - README đầy đủ, có ảnh minh họa.
+- Test: 89 test và 41 đột biến. Có thêm test cho bench, soak, bảng xếp hạng, đổi phím và cỡ chữ.
+
 ## phase-3 — Ticket-03 "Đèn cạn dầu" + Test Contract v1.2
 
 Quyết định thiết kế: [docs/adr/0001-lantern-fuel-and-dawn-win.md](docs/adr/0001-lantern-fuel-and-dawn-win.md).

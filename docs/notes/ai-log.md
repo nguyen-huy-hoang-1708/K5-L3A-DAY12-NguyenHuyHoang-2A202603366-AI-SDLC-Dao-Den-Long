@@ -70,8 +70,27 @@ Công cụ: **Claude Code** (desktop app, model Claude Opus 5.5). Harness: [AGEN
 | 15 | Client vẫn vẽ vòng an toàn cho đèn yếu, dù đèn đó đã mất vùng an toàn (sai luật về mặt hình ảnh) | Xem ảnh playtest `10-night1-lantern-out` | Ẩn vòng khi fuel < 30 rồi chụp lại |
 | 16 | Đèn trên nón của Mây quá sáng khi mang nhiều đom đóm (bloom làm chói nhân vật) | Ảnh `03-night1-play` | Giảm cường độ |
 
+## Phase 4
+
+### Lời nhắc chính
+- Dán nguyên văn Ticket-04. Giữ yêu cầu "không tự push", và không thêm dòng Claude vào commit.
+
+### Trình tự
+1. Viết `phase-4.md` trước, gồm 13 giả định (bench cho bản web, cách đo `load_ms` và `peak_mem_mb`, seed của soak, nơi lưu bảng xếp hạng…).
+2. Viết phần lõi dùng chung (`bench.js`, `leaderboard.js`, `soak.js`) kèm test, rồi tới công cụ bench, client, playtest, video, gói release và tài liệu.
+
+### AI sai ở đâu & cách phát hiện
+| # | Sai | Phát hiện bằng | Sửa / chỉnh harness |
+|---|---|---|---|
+| 17 | Lần soak đầu cho RSS ×1.7, tưởng là rò rỉ bộ nhớ | Đo `heapUsed` qua 30 Đêm thì thấy đứng yên ở khoảng 4 MB; thử các cờ V8 thì `--jitless` cho RSS ổn định | Phần tăng là bộ nhớ của JIT, không phải lỗi game. `soak_cmd` dùng `--jitless`. Số đo khi bật JIT được lưu lại để minh bạch |
+| 18 | Bench lần đầu ghi vùng vẽ 1728×992, không đúng 1280×720 (lệnh chỉnh kích thước chạy trước khi cửa sổ hiện) | Đọc trường `window` trong `bench.json` | Đưa cửa sổ về trạng thái thường, lặp tới khi `innerWidth × innerHeight` = 1280×720, in log ra, rồi chạy lại |
+| 19 | Retina có tỉ lệ điểm ảnh 2, nên bench sẽ vẽ ở độ phân giải lớn hơn chuẩn | Rà lại code trước khi đo | Cảnh bench dùng `setPixelRatio(1)` |
+
 ### Token / chi phí (ước tính)
 - Không có số đo chính xác trong phiên; ước tính theo độ dài phiên: khoảng **60–80k token output** và **~2–3M token input** (phần lớn là ngữ cảnh được cache đọc lại mỗi lượt). Cập nhật số thật từ trang usage của Claude nếu cần.
 - Cách tiết kiệm: đọc tài liệu lab một lần và tóm tắt vào notes; một module luật dùng chung (không viết luật hai lần); không thêm dependency (không `npm install`, không đọc tài liệu thư viện); dùng script sinh bằng chứng thay vì chụp/đọc ảnh nhiều lần; chỉ đọc 4 ảnh để kiểm tra trực quan.
 - Phase 2 (ước tính theo độ dài phiên): khoảng **120–160k token output**, **~6–9M token input** (chủ yếu ngữ cảnh được cache). Tiết kiệm: viết spec + bảng thay đổi trước để agent không đoán; một lần viết lại sim thay vì vá nhiều lần; test chạy qua CLI thật; bot playtest chạy ngầm chỉ đọc ảnh cần thiết (≈ 8 ảnh); không đọc lại file lớn khi không cần.
 - Phase 3 (ước tính): khoảng **60–80k token output**, **~4–6M token input**. Cách tiết kiệm: sửa sim bằng một script thay thế có kiểm tra số lần khớp, không viết lại cả file. Chạy mutation check ngầm song song với việc sửa client. Chỉ đọc 4 ảnh.
+- Phase 4 (ước tính): khoảng **90–120k token output**, **~6–9M token input**. Cách tiết kiệm: một bot và một hạ tầng CDP dùng chung cho playtest, bench và video; chạy mutation check ngầm; video quay tự động thay vì lặp lại thao tác tay.
+- **Tổng 4 phase (ước tính)**: khoảng **0.35–0.45M token output** và **~18–27M token input**, phần lớn là ngữ cảnh được cache đọc lại. Đây là ước tính theo độ dài phiên, chưa phải số đo; số thật xem ở trang usage của Claude.
+

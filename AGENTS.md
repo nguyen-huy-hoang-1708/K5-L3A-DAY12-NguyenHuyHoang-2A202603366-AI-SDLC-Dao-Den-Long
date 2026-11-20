@@ -1,6 +1,6 @@
 # AGENTS.md — Đảo Đèn Lồng
 
-Game 3D web (Three.js) + headless Node theo **Test Contract v1.2** (Ticket-02 số chuẩn, 3 Đêm; Ticket-03 đèn có dầu, thắng ở bình minh — xem `docs/adr/`). Yêu cầu gốc: lab board (tab Phase N). Giả định & tiêu chí nghiệm thu: `docs/notes/phase-N.md`.
+Game 3D web (Three.js) + headless Node theo **Test Contract v1.3** (Ticket-02 số chuẩn, 3 Đêm; Ticket-03 đèn có dầu, thắng ở bình minh — xem `docs/adr/`; Ticket-04 bench/soak/bảng xếp hạng/a11y, release v1.0.0). Yêu cầu gốc: lab board (tab Phase N). Giả định & tiêu chí nghiệm thu: `docs/notes/phase-N.md`.
 
 ## Lệnh
 - Test (contract + unit + scenario + determinism): `npm test`
@@ -8,6 +8,7 @@ Game 3D web (Three.js) + headless Node theo **Test Contract v1.2** (Ticket-02 s�
 - Chạy game: `node tools/serve.js` → http://localhost:8080/web/
 - Bằng chứng headless: `node tools/proof.js phase-N` · Playtest client thật: `node tools/playtest.js --mode campaign|lose --gpu [--night N] --out docs/proof/phase-N/playtest`
 - Kiểm tra test không "luôn xanh": `tools/mutation-check.sh`
+- Bench: `node tools/bench.js --seed 42 --duration 30 --out bench.json` (cửa sổ Chrome thật; `--headless` cho CI) · Soak: `node --jitless --expose-gc headless/soak.js --seed 7 --nights 10 --out soak.json` · Bảng xếp hạng: `node tools/serve.js --export-leaderboard out.json` · Release: `npm run dist` · Video: `node tools/make-demo.js`
 - Sáng tạo không đổi output headless: `tools/creative-check.sh` (chạy bản sao không có `web/`)
 
 ## Kiến trúc
@@ -15,6 +16,7 @@ Game 3D web (Three.js) + headless Node theo **Test Contract v1.2** (Ticket-02 s�
 - Dầu đèn lưu bằng **đơn vị nguyên 1/60** (`fuelU`, đầy = 6000, ngưỡng yếu 1800); chỉ chia 60 khi xuất. So sánh khoảng cách dùng cùng dung sai ở cả hai chiều chuyển trạng thái (vào/ra `drain`).
 - Luật bị ticket **thay thế**: sửa test cũ + ghi lý do trong `docs/notes/phase-N.md` §1, thêm ADR trong `docs/adr/`, ghi breaking change trong `CHANGELOG.md`.
 - `src/maps.js`: bản đồ chuẩn 3 Đêm (góc a → (r·cos a, y, r·sin a)); `surface(x,z)` = mặt đất cao nhất hoặc `null` (biển mây).
+- Chế độ bench chỉ bật bằng `createGame({ bench: true })` — không được làm đổi đầu ra headless thường (kiểm bằng so sánh với tag phase trước).
 - `web/palette.js`: màu chuẩn; client **chỉ** lấy màu các thành phần ticket liệt kê từ đây (`tests/palette.test.js`).
 - `src/inputs.js`: đọc file inputs. `headless/run.js`: CLI contract. `web/main.js`: chỉ hiển thị + bàn phím → input contract.
 - Số tuning nằm ở `TUNING` trong `src/sim.js` và **phải trùng** `game.contract.json` (`tools/check-contract.js` chặn lệch).
