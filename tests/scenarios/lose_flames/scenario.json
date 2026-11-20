@@ -1,2 +1,1 @@
-{ "player": { "flames": 1 }, "random_motes": false, "random_shades": false, "motes": [],
-  "shades": [{ "pos": [1.5, 1, 0] }] }
+{ "player": { "flames": 1 }, "random_motes": false, "random_shades": false, "random_drifters": false, "motes": [], "shades": [], "shades": [{ "pos": [1.5, 1, 0] }] }

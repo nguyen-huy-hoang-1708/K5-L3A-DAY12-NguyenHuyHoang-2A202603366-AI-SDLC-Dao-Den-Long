@@ -1,0 +1,27 @@
+caught (2 failing)  M1 safe zone disabled
+caught (1 failing)  M2 deposit not capped
+caught (1 failing)  M3 no invulnerability
+caught (3 failing)  M4 pulse free + no cooldown
+caught (4 failing)  M5 no deposit score
+caught (1 failing)  M6 wrong yaw sign
+caught (2 failing)  M7 stun 1 s instead of 2 s
+caught (1 failing)  M8 drop rounds up
+caught (1 failing)  M9 dawn never ends the night
+caught (6 failing)  M10 speed drifts from contract
+caught (1 failing)  M11 dash has no cooldown
+caught (1 failing)  M12 dash too short
+caught (1 failing)  M13 drifter steals everything
+caught (1 failing)  M14 drifter chase threshold wrong
+caught (2 failing)  M15 charm has no speed boost
+caught (1 failing)  M16 pause does not freeze sim
+caught (2 failing)  M17 never fall off
+caught (1 failing)  M18 no respawn wait
+caught (2 failing)  M19 wrong shade schedule
+caught (2 failing)  M20 only one shade at tick 300
+caught (1 failing)  M21 no eviction from new safe zone
+caught (1 failing)  M22 wind too strong
+caught (1 failing)  M23 night 3 shades too slow
+caught (1 failing)  M25 night 3 pad too weak
+caught (1 failing)  M26 night 2 shade interval wrong
+caught (1 failing)  M24 tier walls climbable
+ALL MUTATIONS CAUGHT

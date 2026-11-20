@@ -1,2 +1,13 @@
-{ "random_motes": false, "random_shades": false, "motes": [], "shades": [],
-  "lanterns": [{ "id": "L1", "lit": true }] }
+{
+ "random_motes": false,
+ "random_shades": false,
+ "motes": [],
+ "shades": [],
+ "lanterns": [
+  {
+   "id": "L1",
+   "lit": true
+  }
+ ],
+ "random_drifters": false
+}

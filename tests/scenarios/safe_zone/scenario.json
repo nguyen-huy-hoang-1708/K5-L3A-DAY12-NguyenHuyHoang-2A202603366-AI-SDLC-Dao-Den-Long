@@ -1,3 +1,2 @@
-{ "player": { "pos": [0, 0, 10] }, "random_motes": false, "random_shades": false, "motes": [],
-  "shades": [{ "id": "S1", "pos": [0, 1, 20] }, { "id": "S2", "pos": [-12, 1, 10] }],
+{ "player": { "pos": [0, 0, 10] }, "random_motes": false, "random_shades": false, "random_drifters": false, "motes": [], "shades": [], "shades": [{ "id": "S1", "pos": [0, 1, 20] }, { "id": "S2", "pos": [-12, 1, 10] }],
   "lanterns": [{ "id": "L1", "pos": [0, 0, 10], "lit": true }] }

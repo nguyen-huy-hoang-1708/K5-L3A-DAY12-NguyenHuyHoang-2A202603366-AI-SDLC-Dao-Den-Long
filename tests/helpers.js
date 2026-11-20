@@ -8,10 +8,10 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 export const SCEN = path.join(ROOT, 'tests', 'scenarios');
 
 /** Run the headless CLI exactly as the grader would. Returns {code, stderr, lines, raw}. */
-export function runHeadless({ seed = 1, ticks, scenario, inputs, every, extra = [] }) {
+export function runHeadless({ seed = 1, night = 1, ticks, scenario, inputs, every, extra = [] }) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ddl-'));
   const out = path.join(dir, 'out.jsonl');
-  const args = [path.join(ROOT, 'headless', 'run.js'), '--seed', String(seed), '--night', '1', '--ticks', String(ticks), '--out', out];
+  const args = [path.join(ROOT, 'headless', 'run.js'), '--seed', String(seed), '--night', String(night), '--ticks', String(ticks), '--out', out];
   if (scenario) args.push('--scenario', scenario);
   if (inputs) args.push('--inputs', inputs);
   if (every) args.push('--snapshot-every', String(every));
@@ -27,14 +27,16 @@ export function runScenario(name, opts = {}) {
   const d = path.join(SCEN, name);
   const sc = path.join(d, 'scenario.json');
   const inp = path.join(d, 'inputs.json');
+  const meta = fs.existsSync(path.join(d, 'meta.json')) ? JSON.parse(fs.readFileSync(path.join(d, 'meta.json'), 'utf8')) : {};
   return runHeadless({
+    night: meta.night || 1,
     ...opts,
     scenario: fs.existsSync(sc) ? sc : undefined,
     inputs: fs.existsSync(inp) ? inp : undefined,
   });
 }
 
-export const events = (lines, name) => lines.filter((l) => l.type === 'event' && (!name || l.name === name));
+export const events = (lines, name) => lines.filter((l) => l.type === 'event' && (name ? l.name === name : l.name !== 'night_start'));
 export const snaps = (lines) => lines.filter((l) => l.type === 'snapshot');
 export const end = (lines) => lines[lines.length - 1];
 export const snapAt = (lines, t) => snaps(lines).find((s) => s.tick === t);

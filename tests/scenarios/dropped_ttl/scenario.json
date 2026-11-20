@@ -1,0 +1,2 @@
+{ "random_motes": false, "random_shades": false, "random_drifters": false, "shades": [],
+  "motes": [ { "pos": [3, 0, 0], "kind": "dropped", "ttl_ticks": 5 }, [0, 0, 20] ] }
