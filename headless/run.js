@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Headless runner — Test Contract v1.0 §B.
-// node headless/run.js --seed <int> --night 1 [--scenario f] [--inputs f] --ticks <int> --out <f.jsonl> [--snapshot-every 10]
+// Headless runner — Test Contract v1.1.
+// node headless/run.js --seed <int> --night 1|2|3 [--scenario f] [--inputs f] --ticks <int> --out <f.jsonl> [--snapshot-every 10]
 import fs from 'node:fs';
-import { createGame, step, snapshot, ScenarioError } from '../src/sim.js';
+import { createGame, step, snapshot, nightStartEvent, ScenarioError } from '../src/sim.js';
 import { parseInputs, InputTimeline } from '../src/inputs.js';
 
 function fail(msg, code) {
@@ -34,7 +34,7 @@ function parseArgs(argv) {
   if (a.ticks === undefined || a.ticks < 0) fail('--ticks >= 0 is required', 1);
   if (!a.out) fail('--out is required', 1);
   if (a.night === undefined) a.night = 1;
-  if (a.night !== 1) fail(`--night ${a.night} not supported (only 1)`, 1);
+  if (![1, 2, 3].includes(a.night)) fail(`--night ${a.night} not supported (1, 2, 3)`, 1);
   if (a.snapshotEvery < 1) fail('--snapshot-every must be >= 1', 1);
   return a;
 }
@@ -67,6 +67,7 @@ try {
 
 const lines = [];
 const write = (o) => lines.push(JSON.stringify(o));
+write(nightStartEvent(game));
 write(snapshot(game));
 for (let k = 0; k < args.ticks && game.state === 'playing'; k++) {
   const evs = step(game, timeline.at(k));

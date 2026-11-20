@@ -1,7 +1,7 @@
 // Inputs file (Test Contract v1.0 §C): validation + per-tick lookup.
 import { ScenarioError } from './sim.js';
 
-const BUTTONS = ['jump', 'interact', 'pulse', 'dash'];
+const BUTTONS = ['jump', 'interact', 'pulse', 'dash', 'pause'];
 
 export function parseInputs(obj) {
   if (!obj || typeof obj !== 'object' || Array.isArray(obj) || !Array.isArray(obj.frames)) {
@@ -42,7 +42,7 @@ export class InputTimeline {
   constructor(frames = []) {
     this.frames = frames;
     this.i = 0;
-    this.cur = { move: [0, 0], cam_yaw_deg: 0, jump: false, interact: false, pulse: false, dash: false };
+    this.cur = { move: [0, 0], cam_yaw_deg: 0, jump: false, interact: false, pulse: false, dash: false, pause: false };
   }
   at(tick) {
     while (this.i < this.frames.length && this.frames[this.i].tick <= tick) {
