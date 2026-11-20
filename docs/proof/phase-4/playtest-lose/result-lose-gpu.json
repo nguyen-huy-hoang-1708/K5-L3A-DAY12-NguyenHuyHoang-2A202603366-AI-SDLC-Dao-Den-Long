@@ -1,0 +1,48 @@
+{
+  "mode": "lose",
+  "seed": 7,
+  "speed": 4,
+  "lit": 0,
+  "gpu": true,
+  "nights": [
+    {
+      "night": 1,
+      "state": "lost",
+      "score": 0,
+      "flames": 0,
+      "tick": 795,
+      "hud": [
+        "Ngọn lửa0",
+        "Đêm 13:47",
+        "Đèn 0/5 cần 30",
+        "Đom đóm0/10",
+        "⇧Lướt FTỏa sáng"
+      ],
+      "fps_samples": [
+        55.9,
+        59,
+        55,
+        60,
+        60,
+        59
+      ]
+    }
+  ],
+  "checks": {
+    "menu": true,
+    "intro": true,
+    "captions": true,
+    "result": true,
+    "lb_invalid_rejected": true,
+    "lb_screen": true,
+    "lb_export": true,
+    "new_run_from_menu": true
+  },
+  "errors": [],
+  "fps": {
+    "gl": "gpu (metal)",
+    "mean": 58.2,
+    "min": 55,
+    "samples": 6
+  }
+}
